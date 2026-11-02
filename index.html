@@ -55,12 +55,17 @@ select{width:auto}
 .seg button,.dbtn{font:inherit;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:8px 4px;cursor:pointer;min-height:44px}
 [hidden]{display:none!important}
 #bed{width:100%;min-width:0;max-width:100%}
+#screwSet .adv>span{min-width:0}
+#screwTable{table-layout:fixed;width:100%}
+#screwTable td{font-family:var(--body);font-size:12.5px;line-height:1.4;white-space:normal;overflow-wrap:anywhere;vertical-align:top}
+#screwTable td:first-child{width:36%;font-weight:600}
 .field{min-width:0}
 .seg2{grid-template-columns:repeat(2,minmax(0,1fr))}
 .seg3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.linkbtn{font:inherit;font-weight:600;color:var(--ink);background:none;border:0;padding:0 2px;text-decoration:underline;text-underline-offset:3px;cursor:pointer;min-height:32px}
 .rmwhy{margin:0;padding-left:1.2em;display:grid;gap:6px;font-size:13.5px;color:var(--muted);max-width:75ch}
 .rmwhy b{color:var(--ink)}
-#ubView,#holdView,#railView{width:100%;height:auto;display:block}
+#ubView,#holdView,#railView,#cgView{width:100%;height:auto;display:block}
 .seg button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
 .designs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .dbtn{display:grid;justify-items:center;gap:4px;padding:8px}
@@ -89,11 +94,25 @@ details summary::-webkit-details-marker{display:none}details summary::before{con
 body[data-tab=design] [data-tabs]:not([data-tabs~=design]),body[data-tab=print] [data-tabs]:not([data-tabs~=print]),body[data-tab=build] [data-tabs]:not([data-tabs~=build]),body[data-tab=play] [data-tabs]:not([data-tabs~=play]){display:none}
 body[data-tab=build] .wrap{grid-template-columns:minmax(0,1fr)}
 body[data-tab=build] .stage{grid-template-columns:minmax(0,5fr) minmax(0,6fr);align-items:start}
-body[data-tab=build] .boardfig{grid-row:span 3;position:sticky;top:72px}
+body[data-tab=build] .boardfig{grid-row:span 4;position:sticky;top:72px}
 @media (max-width:900px){body[data-tab=print] .stage{order:-1}body[data-tab=build] .stage{grid-template-columns:minmax(0,1fr)}body[data-tab=build] .boardfig{grid-row:auto;position:static}}
 @media (max-width:480px){.tabs button{flex-direction:column;gap:2px;font-size:13px;padding:6px 2px}}
 .boardfig{margin:0;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px;display:grid;gap:8px}
 #board{width:100%;max-width:640px;height:auto;margin:0 auto;display:block}
+/* Design tab: the board stays in view while the settings scroll */
+@media (min-width:901px){
+  body[data-tab=design] .wrap{align-items:stretch}
+  body[data-tab=design] .stage{align-content:start}
+  body[data-tab=design] .boardfig{position:sticky;top:72px}
+  body[data-tab=design] #board{max-height:calc(100vh - 150px);width:100%}}
+/* help bubble for the settings */
+.tip{position:fixed;z-index:30;max-width:300px;background:var(--ink);color:var(--bg);border-radius:6px;padding:10px 12px;font-size:13.5px;line-height:1.45;box-shadow:0 6px 24px rgba(0,0,0,.25);pointer-events:none;opacity:0;transform:translateY(4px);transition:opacity .12s ease-out,transform .12s ease-out}
+.tip.show{opacity:1;transform:none}
+.tip b{display:block;font-family:var(--display);font-size:14.5px;margin-bottom:2px}
+.tip small{display:block;margin-top:4px;opacity:.75}
+[data-help]{border-radius:4px;transition:background .12s}
+[data-help].hl-on{background:var(--accent-soft)}
+@media (prefers-reduced-motion:reduce){.tip{transition:none}}
 .cap{font-size:13px;color:var(--muted);text-align:center;margin:0}
 .warns{display:grid;gap:8px}
 .warn{background:var(--warn-bg);color:var(--warn);border-radius:4px;padding:8px 12px;font-size:14px}
@@ -350,6 +369,27 @@ td:last-child{font-family:var(--mono);font-variant-numeric:tabular-nums;font-siz
       </div>
       <p class="note" style="margin-top:8px">Leave the centre design blank for the automatic size. "Panel under the frame" is how far the plywood runs under each rail; the stencils then line up with the panel edge.</p>
     </details>
+
+    <details open id="railSet">
+      <summary>Rails (fences)</summary>
+      <div class="adv">
+        <label for="rW">Rail width</label><span class="row"><input type="number" id="rW" min="15" max="120" step="1" value="65"><span class="unit">mm</span></span>
+        <label for="rH">Height above the surface</label><span class="row"><input type="number" id="rH" min="5" max="50" step="0.5" value="22"><span class="unit">mm</span></span>
+        <label for="rT">Panel thickness</label><span class="row"><input type="number" id="rT" min="6" max="40" step="0.5" value="21"><span class="unit">mm</span></span>
+        <label for="rB">Rail below the panel</label><span class="row"><input type="number" id="rB" min="0" max="60" step="1" value="0"><span class="unit">mm</span></span>
+      </div>
+      <p class="note">Official: 19 to 25.4 mm above the surface, 63.5 to 76 mm wide. Used by the printed corners, pocket rims and the cut list.</p>
+    </details>
+
+    <details open id="screwSet">
+      <summary>Screws</summary>
+      <div class="adv">
+        <span class="lbl" id="scrHeadLbl">Head</span><div class="seg seg2" id="scrHead" role="group" aria-labelledby="scrHeadLbl"><button type="button" data-cs="1">Countersunk</button><button type="button" data-cs="0">Flat</button></div>
+        <label for="scrLen">Length</label><span class="row"><input type="number" id="scrLen" min="8" max="60" step="1" value="16"><span class="unit">mm</span></span>
+      </div>
+      <div class="tablebox"><table id="screwTable"></table></div>
+      <p class="note">For screws of about 4 mm with an 8 mm head. Countersunk heads sit flush, flat heads sit on top. Long screws make the rim plate and foot flange thicker, so nothing comes through the playing surface.</p>
+    </details>
   </section>
 
   <div class="stage">
@@ -372,6 +412,7 @@ td:last-child{font-family:var(--mono);font-variant-numeric:tabular-nums;font-siz
         <label class="check" style="margin-top:6px"><input type="checkbox" id="projCoins" checked> Add the 19 coins (one plate per colour)</label>
         <label class="check" style="margin-top:6px"><input type="checkbox" id="projUnder" checked> Add 4 pocket rims and 4 feet</label>
         <label class="check" style="margin-top:6px"><input type="checkbox" id="projHolder" checked> Add the rulebook holder</label>
+        <label class="check" style="margin-top:6px"><input type="checkbox" id="projGuards"> Add 4 printed corners</label>
       </div>
       <p class="note" id="dlnote" hidden>Downloads aren't available in this view. Open the page on claude.ai to save files.</p>
       <p class="note">The pack holds every stencil below, the full-size board, and a README with the order of work. The Bambu Studio project has every piece already at its thickness, packed onto build plates, plus the striker with its 3 colour parts. Open it, pick your filaments, and slice plate by plate. For single SVGs: stencils at the stencil thickness (TPU seals best; PETG works), marking template 1.2 mm, hole saw guide 6 mm (10 mm with lean stencils off).</p>
@@ -443,13 +484,14 @@ td:last-child{font-family:var(--mono);font-variant-numeric:tabular-nums;font-siz
         <div class="field">
           <span class="lbl" id="footLbl">Foot design</span>
           <div class="sdesigns cdesigns" id="feet" role="group" aria-labelledby="footLbl"></div>
+          <label class="check"><input type="checkbox" id="ubJoin"> Join each foot to its pocket rim (4 parts instead of 8)</label>
           <span class="lbl" id="fhLbl">Foot height</span>
           <div class="seg seg3" id="fhseg" role="group" aria-labelledby="fhLbl"><button type="button" data-h="30">30 mm</button><button type="button" data-h="45">45 mm</button><button type="button" data-h="65">65 mm</button></div>
           <p class="weight" id="ubNote"></p>
           <div class="exports">
             <button class="btn primary" id="ub3mfBtn" data-dl type="button">Download 4 pocket rims + 4 feet (.3mf)</button>
           </div>
-          <p class="note">Print flat face down, no supports. PETG or PLA, 4 walls, 30% infill. Screws: 4 × 12 mm flat head, 4 per rim and 3 per foot. Drill 2.5 mm pilot holes, 9 mm deep. The rim hole is 1 mm bigger than the pocket, so no edge catches a coin. Tie a cloth bag in the groove on the collar. Put each foot about 110 mm in from both edges, so it clears the rim.</p>
+          <p class="note">Print flat face down, no supports. PETG or PLA, 4 walls, 30% infill. Screws: 4 per rim and 3 per foot. Pick the type and length under Screws in the settings. Drill 2.5 mm pilot holes, 9 mm deep. The rim hole is 1 mm bigger than the pocket, so no edge catches a coin. Tie a cloth bag in the groove on the collar. Put each separate foot about 110 mm in from both edges, so it clears the rim. Joined feet need no screws of their own: the rim holds them.</p>
         </div>
       </div>
     </section>
@@ -465,19 +507,32 @@ td:last-child{font-family:var(--mono);font-variant-numeric:tabular-nums;font-siz
           <div class="exports">
             <button class="btn primary" id="hold3mfBtn" data-dl type="button">Download rulebook holder (.3mf)</button>
           </div>
-          <p class="note">Holds the A4 fold-up zine from How to play. Screw it under the board near the middle, with the open end toward one side, so you can reach in and slide the booklet out. The window shows the cover. 4 flat-head screws, 4 × 16 mm, because the tabs are 7 mm thick. Print window side down, no supports.</p>
+          <p class="note">Holds the A4 fold-up zine from How to play. Screw it under the board near the middle, with the open end toward one side, so you can reach in and slide the booklet out. The window shows the cover. 4 screws (see Screws in the settings); the tabs are 7 mm thick. Print window side down, no supports.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" aria-label="Printed corners" data-tabs="print">
+      <h2>Printed corners (3D print)</h2>
+      <div class="sgrid">
+        <div>
+          <svg id="cgView" role="img" aria-label="Printed corner seen from above with two square-cut rails sliding in, and from the side"></svg>
+        </div>
+        <div class="field">
+          <p class="weight" id="cgNote"></p>
+          <label class="row" for="cgDeco"><span class="lbl">Top design</span><select id="cgDeco"></select></label>
+          <div class="exports">
+            <button class="btn" id="cgRails" type="button">Set rail (fence) sizes</button>
+            <button class="btn primary" id="cg3mfBtn" data-dl type="button">Download 4 printed corners (.3mf)</button>
+          </div>
+          <p class="note">No mitres needed: cut the 4 rails square, all the same length, and slide their ends into the corners. The inside faces stay flush with the rails, so the bounce is the same. Glue the rail ends and screw through the sleeves. The top design is a simple motif in the style of your striker, inlaid 0.6 mm deep in the cap, in the striker colours. It prints face down on the bed, so it comes out crisp. It needs an AMS; pick None for one colour. Set the rail sizes first (settings panel, "Rails (fences)"). Print as it comes, cap on the bed, no supports. PETG or PLA, 4 walls. Drill pilot holes into the rails. With 4-screw pocket rims, the corner screw goes into the printed corner.</p>
         </div>
       </div>
     </section>
 
     <section class="panel" aria-labelledby="railTitle" data-tabs="build">
-      <h2 id="railTitle">Rails (frame)</h2>
-      <div class="adv">
-        <label for="rW">Rail width</label><span class="row"><input type="number" id="rW" min="15" max="120" step="1" value="65"><span class="unit">mm</span></span>
-        <label for="rH">Height above the surface</label><span class="row"><input type="number" id="rH" min="5" max="50" step="0.5" value="22"><span class="unit">mm</span></span>
-        <label for="rT">Panel thickness</label><span class="row"><input type="number" id="rT" min="6" max="40" step="0.5" value="21"><span class="unit">mm</span></span>
-        <label for="rB">Rail below the panel</label><span class="row"><input type="number" id="rB" min="0" max="60" step="1" value="0"><span class="unit">mm</span></span>
-      </div>
+      <h2 id="railTitle">Rails (frame, fences)</h2>
+      <p class="note">Set the rail sizes on the Design tab, under "Rails (fences)". <button class="linkbtn" id="railsEdit" type="button">Change rail sizes</button></p>
       <div class="field">
         <span class="lbl" id="rmLbl">Rail marks (optional)</span>
         <div class="seg" id="rmseg" role="group" aria-labelledby="rmLbl"><button type="button" data-m="none">None</button><button type="button" data-m="quarters">Quarters</button><button type="button" data-m="baselines">Baselines</button><button type="button" data-m="both">Both</button></div>
@@ -510,6 +565,17 @@ td:last-child{font-family:var(--mono);font-variant-numeric:tabular-nums;font-siz
         <li><b>Let it harden</b> for a few days. Then dust on carrom powder and play.</li>
       </ol>
       <p class="note">Only the top coat changes how the striker slides: satin or gloss slides best. Spray cans dry slowly below 10 &deg;C. Test the full finish on a scrap piece first.</p>
+    </section>
+
+    <section class="panel" aria-labelledby="bagTitle" data-tabs="build">
+      <h2 id="bagTitle">Pocket bags</h2>
+      <ol class="steps">
+        <li><b>Use old socks.</b> They stretch, they are soft, so the coins drop quietly, and they cost nothing. Thick, dark sports socks work best.</li>
+        <li><b>Wash them,</b> then cut off the toe end. The toe is the closed bottom of the bag.</li>
+        <li><b>Stretch the open end over the collar</b> under each pocket. The collar is about <span id="sockCollar">52</span> mm across.</li>
+        <li><b>Tie it in the groove</b> on the collar with a rubber band, a zip tie or string.</li>
+      </ol>
+      <p class="note" id="sockNote"></p>
     </section>
   </div>
 </div>
@@ -682,6 +748,7 @@ td:last-child{font-family:var(--mono);font-variant-numeric:tabular-nums;font-siz
 </footer>
 <div id="zine" aria-hidden="true"></div>
 </div>
+<div class="tip" id="tip" role="tooltip" aria-hidden="true"></div>
 <div id="toast" role="status" aria-live="polite"></div>
 
 <script>!function(t,e){"object"==typeof exports&&"undefined"!=typeof module?module.exports=e():"function"==typeof define&&define.amd?define(e):(t="undefined"!=typeof globalThis?globalThis:t||self).polygonClipping=e()}(this,(function(){"use strict";
@@ -938,7 +1005,7 @@ function boardMarkup(forExport){
   }
   return {s,pad};
 }
-function drawBoard(){const {s,pad}=boardMarkup(false);const sv=$('#board');const L=G.L;sv.setAttribute('viewBox',(-pad)+' '+(-pad)+' '+(L+2*pad)+' '+(L+2*pad));sv.innerHTML=s;
+function drawBoard(){const {s,pad}=boardMarkup(false);const sv=$('#board');const L=G.L;sv.setAttribute('viewBox',(-pad)+' '+(-pad)+' '+(L+2*pad)+' '+(L+2*pad));sv.innerHTML=s;applyHL();
   $('#cap').textContent=Math.round(L)+' × '+Math.round(L)+' mm playing surface · '+DESIGNS[st.design].name+' centre, '+st.k+' colours'+(st.overlay?' · dashed outlines show where each stencil sits':'');}
 function boardSVG(){const L=G.L,m=st.m,W=L+2*m;const {s}=boardMarkup(true);
   return '<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="'+f2(W)+'mm" height="'+f2(W)+'mm" viewBox="'+f2(-m)+' '+f2(-m)+' '+f2(W)+' '+f2(W)+'">'+s+'</svg>\n';}
@@ -1003,7 +1070,7 @@ function readme(){const L=G.L,m=st.m;let t='CARROM STENCIL PACK - '+Math.round(L
 
 let pt=null;
 function update(colorOnly){G=geom();SH=paintShapes(G);try{markPreset();}catch(e){}
-  drawSwatches();drawDesigns();drawDims();drawCoins();drawUnder();drawHolder();drawRails();fillCover();
+  drawSwatches();drawDesigns();drawDims();drawCoins();applyScrew();drawUnder();drawHolder();drawGuard();drawRails();drawScrews();fillCover();
   clearTimeout(pt);
   if(colorOnly){drawBoard();drawPieces();return;}
   drawBoard();
@@ -1204,12 +1271,12 @@ function drawStriker(){if(!window.polygonClipping)return;
   const box=$('#sdesigns');box.innerHTML='';
   Object.keys(STRIKERS).forEach(k=>{const b=document.createElement('button');b.type='button';b.className='dbtn';b.setAttribute('aria-pressed',String(sk.design===k));
     const r=sk.D/2;b.innerHTML='<svg viewBox="'+f2(-r)+' '+f2(-r)+' '+f2(2*r)+' '+f2(2*r)+'" aria-hidden="true">'+strikerSVG(k,false)+'</svg><span>'+STRIKERS[k].name+'</span>';
-    b.addEventListener('click',()=>{sk.design=k;drawStriker();});box.appendChild(b);});
+    b.addEventListener('click',()=>{sk.design=k;drawStriker();drawGuard();});box.appendChild(b);});
   const v=strikerBody(null).volume()/1000;
   $('#sweight').textContent='Weight at 100% infill: about '+(v*1.24).toFixed(1)+' g in PLA, '+(v*1.27).toFixed(1)+' g in PETG';}
 function drawSwatchesS(){const box=$('#sswatch');box.innerHTML='';
   sk.colors.forEach((c,i)=>{const d=document.createElement('div');d.className='sw';d.innerHTML='<input type="color" id="sc'+i+'" value="'+c+'"><label for="sc'+i+'">'+SNAMES[i]+'</label>';
-    d.querySelector('input').addEventListener('input',ev=>{sk.colors[i]=ev.target.value;drawStriker();});box.appendChild(d);});}
+    d.querySelector('input').addEventListener('input',ev=>{sk.colors[i]=ev.target.value;drawStriker();drawGuard();});box.appendChild(d);});}
 [['sD','D'],['sH','H'],['sI','inlay']].forEach(([id,key])=>{$('#'+id).addEventListener('change',e=>{const v=parseFloat(e.target.value);
   if(!isNaN(v))sk[key]=Math.min(+e.target.max,Math.max(+e.target.min,v));e.target.value=sk[key];drawStriker();});});
 const stag=()=>'striker'+f2(sk.D).replace('.','_')+'-'+sk.design;
@@ -1239,7 +1306,7 @@ function pieceMesh(p,rot){const h=p.height||st.stT;
   let mp=p.geom.map(poly=>poly.map(r=>r.map(([x,y])=>rot?[p.H-y,p.W-x]:[x,p.H-y])));
   const W=rot?p.H:p.W,H=rot?p.W:p.H;mp=mp.map(poly=>poly.map(r=>r.map(([x,y])=>[x-W/2,y-H/2])));
   const m=Mesh();extrude(m,mp,0,h);return m;}
-function projectPlates(withStriker,withCoins,withUnder,withHolder){
+function projectPlates(withStriker,withCoins,withUnder,withHolder,withGuards){
   const items=PIECES.map(p=>({kind:'piece',p,w:p.W,h:p.H,name:p.file.replace(/\.svg$/,'')}));
   const plates=packPlates(items).map(pl=>{
     const x0=Math.min(...pl.items.map(i=>i.spot.x)),y0=Math.min(...pl.items.map(i=>i.spot.y)),x1=Math.max(...pl.items.map(i=>i.spot.x+i.spot.w)),y1=Math.max(...pl.items.map(i=>i.spot.y+i.spot.h));
@@ -1255,6 +1322,7 @@ function projectPlates(withStriker,withCoins,withUnder,withHolder){
   if(withCoins){plates.push(...coinPlates(cols.length));cols.push(...cc.colors);}
   if(withUnder)plates.push(...ubPlates());
   if(withHolder)plates.push(...holderPlates());
+  if(withGuards){plates.push(...guardPlates());if(cornerDeco(cornerDims())&&cols.length<3)sk.colors.slice(cols.length).forEach(c=>cols.push(c));}
   plates.colours=cols.length?cols:['#F2B705'];
   return plates;}
 /* Bambu Studio needs full project settings: standard Bambu Lab P2S 0.4 presets (0.20mm Standard, Generic PLA), supports off */
@@ -1302,7 +1370,7 @@ function bambu3MF(plates,type){
   return z.generateAsync({type:type||'blob',compression:'DEFLATE'});}
 
 $('#projBtn').addEventListener('click',async()=>{if(!window.JSZip||!PIECES.length){toast('The pieces are still being prepared.');return;}
-  try{const pl=projectPlates($('#projStriker').checked,$('#projCoins').checked,$('#projUnder').checked,$('#projHolder').checked);const blob=await bambu3MF(pl,'blob');save('carrom'+Math.round(G.L)+'-project.3mf',blob);toast('Saved project with '+pl.length+' plates');}
+  try{const pl=projectPlates($('#projStriker').checked,$('#projCoins').checked,$('#projUnder').checked,$('#projHolder').checked,$('#projGuards').checked);const blob=await bambu3MF(pl,'blob');save('carrom'+Math.round(G.L)+'-project.3mf',blob);toast('Saved project with '+pl.length+' plates');}
   catch(e){toast('Could not build the project. '+(e&&e.message||''));}});
 
 /* ---------- coins (3D print): 9 white, 9 black, 1 queen; grooves on the top face like wooden carrom men ---------- */
@@ -1368,8 +1436,21 @@ $('#c3mfBtn').addEventListener('click',async()=>{if(!window.JSZip){toast('The 3M
 drawSwatchesC();
 
 /* ---------- under the board (3D print): pocket rims that hold a cloth bag, and feet ---------- */
-const ub={foot:'tulip',fh:45},rail={w:65,h:22,t:21,b:0,marks:'both'};
-const CS_CLEAR=4.6,CS_HEAD=8.4;   // 4 mm flat-head screws: shank clearance, countersink top
+const ub={foot:'tulip',fh:45,joined:false},rail={w:65,h:22,t:21,b:0,marks:'both'};
+let CS_CLEAR=4.6,CS_HEAD=8.4,FOOT_T=5;   // screw hole: shank clearance and countersink top; set by applyScrew()
+/* screws: about 4 mm thread with an 8 mm head; countersunk or flat head */
+const scr={d:4,head:8,cs:true,len:16};
+/* plastic thickness under a screw head: thicker than the base when the screw is long, so it never reaches the playing surface (3 mm left) */
+function seatT(base,wood){return Math.min(base+6,Math.max(base,scr.len-(wood-3)));}
+function applyScrew(){CS_CLEAR=scr.d+0.5;CS_HEAD=scr.cs?scr.head+0.4:CS_CLEAR;RIM.t=seatT(4,rail.t);FOOT_T=seatT(5,rail.t);}
+/* what each screw does in each part: plastic it passes, wood it bites, and whether that is safe */
+function drawScrews(){const tb=$('#screwTable');if(!tb)return;const parts=[
+    ['Pocket rim plate',RIM.t,4,rail.t,'panel'],['Foot flange',FOOT_T,5,rail.t,'panel'],
+    ['Rulebook holder tab',HOLD.base+HOLD.gap,HOLD.base+HOLD.gap,rail.t,'panel'],['Printed corner sleeve',cornerDims().t,CG.wall,rail.w,'rail']];
+  const tag=(ok,t)=>'<span class="tag '+(ok?'ok':'bad')+'">'+t+'</span> ';
+  tb.innerHTML='<tr><td>Part</td><td>Screw '+f1(scr.d)+' × '+scr.len+' mm</td></tr>'+parts.map(([nm,t,base,wood,what])=>{const into=scr.len-t,lim=wood-3;
+    const st_=into>lim?tag(false,'Too long')+'it would come through the '+what+'. Use a screw of '+Math.floor(t+lim)+' mm or less.':into<6?tag(false,'Short')+'only '+f1(into)+' mm in the wood: weak.':tag(true,'OK')+f1(into)+' mm into the '+what+'.';
+    return '<tr><td>'+nm+'</td><td>'+st_+(t>base?' Made '+f1(t)+' mm thick for this screw.':'')+'</td></tr>';}).join('');}
 const RIM={t:4,wall:3,h:18,groove:[8,11,1.2]};
 const FEET={tulip:{name:'Tulip'},bun:{name:'Bun'},facet:{name:'Faceted'},offset:{name:'Offset hex'}};
 /* offset hex: a big hexagon under the board, a small one on the floor, pushed to one side so that side stays straight up and the others lean */
@@ -1399,22 +1480,29 @@ function roundPoly(P,r,seg){seg=seg||8;const out=[];
     for(let k=0;k<=seg;k++){const A=A0+dA*k/seg;out.push([C[0]+r*Math.cos(A),C[1]+r*Math.sin(A)]);}});
   return out;}
 /* flat plate, thickness t, with countersunk screw holes (the countersink opens at z=t) and plain round holes */
-function csPlate(outline,screws,t,cuts){const m=Mesh(),NS=40,d=(CS_HEAD-CS_CLEAR)/2,out=ringArea(outline)>0?outline:outline.slice().reverse();
-  const rS=screws.map(([x,y])=>circ(x,y,CS_CLEAR/2,NS)),rH=screws.map(([x,y])=>circ(x,y,CS_HEAD/2,NS)),rC=cuts.map(c=>c.ring||circ(c.x,c.y,c.r,128));
+function csPlate(outline,screws,t,cuts){const m=Mesh(),NS=40,d=Math.max(0,Math.min((CS_HEAD-CS_CLEAR)/2,t-0.4)),out=ringArea(outline)>0?outline:outline.slice().reverse();
+  const rS=screws.map(([x,y])=>circ(x,y,CS_CLEAR/2,NS)),rH=screws.map(([x,y])=>circ(x,y,CS_CLEAR/2+d,NS)),rC=cuts.map(c=>c.ring||circ(c.x,c.y,c.r,128));
   m.cap([out,...rH,...rC],t,true);m.cap([out,...rS,...rC],0,false);
   m.wall(out,0,t,true);rC.forEach(r=>m.wall(r,0,t,false));
   rS.forEach((r,i)=>{m.wall(r,0,t-d,false);const h=rH[i];
     for(let k=0;k<NS;k++){const j=(k+1)%NS,a=m.id(r[k][0],r[k][1],t-d),b=m.id(r[j][0],r[j][1],t-d),c=m.id(h[j][0],h[j][1],t),e=m.id(h[k][0],h[k][1],t);m.tri(a,c,b);m.tri(a,e,c);}});
   return m;}
-function rimShape(){const c=st.pocket/2,ri=(st.pocket+1)/2,e=rimReach(),s=c+49.5;
-  const screws=[[c+35.5,c-10.5],[c-10.5,c+35.5],[c+23.5,c+23.5]],corner=e>=14;if(corner)screws.push([-e+5.7,-e+13.7]);
-  return {c,ri,ro:ri+RIM.wall,e,s,corner,outline:roundPoly([[-e,-e],[s,-e],[s,s*0.42],[s*0.42,s],[-e,s]],4),screws};}
+function rimShape(){const c=st.pocket/2,ri=(st.pocket+1)/2,e=rimReach(),s=c+49.5,fx=c+35.5;
+  const screws=[[c+35.5,c-10.5],[c-10.5,c+35.5]],corner=e>=14;if(!ub.joined)screws.push([c+23.5,c+23.5]);if(corner)screws.push([-e+5.7,-e+13.7]);
+  let outline=roundPoly([[-e,-e],[s,-e],[s,s*0.42],[s*0.42,s],[-e,s]],4);
+  /* joined foot: a round pad (radius 24) on the diagonal, past the collar, carries the foot column */
+  if(ub.joined)outline=window.polygonClipping.union([outline],[circ(fx,fx,24,96)])[0][0];
+  return {c,ri,ro:ri+RIM.wall,e,s,fx,corner,outline,screws};}
 /* pocket rim: flat plate under the board corner + collar under the hole; the bag ties in the collar groove */
 function rimParts(){const R=rimShape(),[g0,g1,gd]=RIM.groove,h=RIM.h,{ri,ro}=R;
   const plate=csPlate(R.outline,R.screws,RIM.t,[{x:R.c,y:R.c,r:ri+1.5}]);
   const col=lathe(Mesh(),[[ri,0],[ro,0],[ro,g0],[ro-gd,g0],[ro-gd,g1],[ro,g1+gd],[ro,h-0.8],[ro-0.8,h],[ri,h]],128);
   col.v.forEach(v=>{v[0]+=R.c;v[1]+=R.c;});
-  return [{name:'plate',m:plate},{name:'collar',m:col}];}
+  const out=[{name:'plate',m:plate},{name:'collar',m:col}];
+  /* joined foot; the offset hex is turned so its straight face points out to the board corner and the other faces lean in */
+  if(ub.joined){const f=footColumn(),th=ub.foot==='offset'?-Math.PI/4:0,cs=Math.cos(th),sn=Math.sin(th);
+    f.v.forEach(v=>{const x=v[0]*cs-v[1]*sn,y=v[0]*sn+v[1]*cs;v[0]=x+R.fx;v[1]=y+R.fx;});out.push({name:'foot',m:f});}
+  return out;}
 /* foot side profile, (r,z) from the board face (z=0) to the floor (z=H); flange 5 mm */
 function footProfile(d,H){const t=5;let P;
   if(d==='tulip'){const rt=17,rw=13,rb=16,z0=t+5,zw=z0+(H-1.5-z0)*0.55;P=[[0,0],[rt+4,0],[rt+4,t]];
@@ -1429,14 +1517,14 @@ function footProfile(d,H){const t=5;let P;
   return P;}
 const FOOT_HOLES=[0,1,2].map(i=>{const a=Math.PI/2+i*TAU/3;return [27.5*Math.cos(a),27.5*Math.sin(a)];});
 function flangeRing(){const u=window.polygonClipping.union([circ(0,0,22,96)],...FOOT_HOLES.map(([x,y])=>[circ(x,y,8,48)]));return u[0][0];}
-function footParts(){const fl=csPlate(flangeRing(),FOOT_HOLES,5,[]);
-  const col=ub.foot==='offset'?offsetHexMesh(ub.fh):lathe(Mesh(),footProfile(ub.foot,ub.fh),ub.foot==='facet'?8:128,ub.foot==='facet'?Math.PI/8:0);
-  return [{name:'flange',m:fl},{name:'column',m:col}];}
+function footColumn(){return ub.foot==='offset'?offsetHexMesh(ub.fh):lathe(Mesh(),footProfile(ub.foot,ub.fh),ub.foot==='facet'?8:128,ub.foot==='facet'?Math.PI/8:0);}
+function footParts(){const fl=csPlate(flangeRing(),FOOT_HOLES,FOOT_T,[]);
+  return [{name:'flange',m:fl},{name:'column',m:footColumn()}];}
 /* shift a set of parts so their footprint is centred on the origin */
 function centreXY(parts){let a=1e9,b=1e9,c=-1e9,d=-1e9;parts.forEach(q=>q.m.v.forEach(v=>{a=Math.min(a,v[0]);b=Math.min(b,v[1]);c=Math.max(c,v[0]);d=Math.max(d,v[1]);}));
   const dx=(a+c)/2,dy=(b+d)/2;parts.forEach(q=>q.m.v.forEach(v=>{v[0]-=dx;v[1]-=dy;}));return {W:c-a,H:d-b};}
 function ubPlates(){const out=[],settings={wall_loops:'4',sparse_infill_density:'30%'};
-  [['Pocket rim','Pocket rims',rimParts()],['Foot '+FEET[ub.foot].name+' '+ub.fh+' mm','Feet',footParts()]].forEach(([label,plName,parts])=>{
+  (ub.joined?[['Pocket rim with '+FEET[ub.foot].name+' foot '+ub.fh+' mm','Pocket rims with feet',rimParts()]]:[['Pocket rim','Pocket rims',rimParts()],['Foot '+FEET[ub.foot].name+' '+ub.fh+' mm','Feet',footParts()]]).forEach(([label,plName,parts])=>{
     const sz=centreXY(parts),pitch=Math.max(sz.W,sz.H)+8,cols=Math.max(1,Math.floor((Math.min(st.bedW,st.bedD)-4)/pitch)),per=cols*cols;
     for(let q0=0;q0<4;q0+=per){const items=[],cnt=Math.min(per,4-q0),rows=Math.ceil(cnt/cols);
       for(let q=0;q<cnt;q++){const r=Math.floor(q/cols),c=q%cols,inRow=Math.min(cols,cnt-r*cols),nm=label+' '+(q0+q+1);
@@ -1470,18 +1558,96 @@ function drawHolder(){if(!$('#holdView')||!window.polygonClipping)return;const g
 $('#hold3mfBtn').addEventListener('click',async()=>{if(!window.JSZip){toast('The 3MF writer could not load.');return;}
   try{const pl=holderPlates();pl.colours=['#F2B705'];const blob=await bambu3MF(pl,'blob');save('carrom-rulebook-holder.3mf',blob);}
   catch(e){toast('Could not build the holder. '+(e&&e.message||''));}});
+/* printed corner: replaces mitred joints. The 4 rails are cut square, all the same length, and their ends slide into this block:
+   a square post fills the corner, a sleeve wraps the outside face of each rail end, and a cap covers the tops. Inner faces stay flush with the rails. */
+const CG={wall:2.4,cap:2.5,post:2,sleeve:30,gap:0.25,deco:'match',inlay:0.6,r:12};
+function railStock(){return st.m>0?rail.h:rail.h+rail.t+rail.b;}
+/* corner motifs: the idea of each striker design, simplified to a few bold shapes so it reads (and prints) at about 28 mm */
+const MOTIFS={
+  bloom:R=>{const a=[],b=[[circ(0,0,0.2*R)]];for(let i=0;i<8;i++)a.push(petal(0,0,i*TAU/8,0.32*R,0.95*R,0.2*R));return [a,b];},
+  /* turned 45 degrees: on every corner one point aims at the board centre, like the arrows on the board */
+  star:R=>{const a=[],b=[[circ(0,0,0.16*R)]];for(let i=0;i<4;i++)a.push(kite(0,0,i*TAU/4+TAU/8,0.24*R,0.4*R,0.98*R,0.26*R));return [a,b];},
+  sunray:R=>{const a=[],b=[[circ(0,0,0.3*R)]];for(let i=0;i<8;i++)a.push(ray(0,0,i*TAU/8,0.42*R,0.98*R,0.13*R));return [a,b];},
+  rings:R=>[[annulus(0,0,0.74*R,0.96*R)],[[circ(0,0,0.36*R)]]],
+  hexa:R=>{const a=[],b=[[circ(0,0,0.18*R)]];for(let i=0;i<6;i++)a.push(kite(0,0,i*TAU/6,0.28*R,0.58*R,0.98*R,0.22*R));return [a,b];},
+  pinwheel:R=>{const a=[],b=[[circ(0,0,0.2*R)]];for(let i=0;i<4;i++)a.push(blade(0,0,i*TAU/4,0.3*R,0.98*R,0.3*R,0.8));return [a,b];},
+  bullseye:R=>[[annulus(0,0,0.76*R,0.97*R),[circ(0,0,0.22*R)]],[annulus(0,0,0.42*R,0.6*R)]],
+  compass:R=>{const a=[[circ(0,0,0.26*R)]],b=[annulus(0,0,0.84*R,0.97*R)];for(let i=0;i<4;i++)a.push(kite(0,0,i*TAU/4,0.1*R,0.26*R,0.78*R,0.17*R));return [a,b];}};
+/* mini motif for the cap top, centred on the corner square; [colour 2, colour 3] polygons */
+function cornerDeco(D){const k=CG.deco==='match'?sk.design:CG.deco;if(k==='none'||!STRIKERS[k])return null;const PC=window.polygonClipping,R=D.o/2-2.5,cx=-D.o/2,cy=-D.o/2;
+  const [a,b]=(MOTIFS[k]||STRIKERS[k].build)(R),mv=g=>g.map(po=>po.map(r=>r.map(([x,y])=>[x+cx,y+cy])));
+  const A=PC.union(...mv(a)),B=PC.difference(PC.union(...mv(b)),A);return {k,A,B,R,cx,cy};}
+function cornerDims(){const w=rail.w,c=CG.gap,t=seatT(CG.wall,rail.w),H=railStock()+c;return {w,c,t,H,S:CG.sleeve,o:w+c+t,tot:H+CG.cap};}
+/* one sleeve wall (u along the rail, v up, w out from the rail), with a countersunk screw opening outwards */
+function sleeveWall(D,map){const m=csPlate([[0,0],[D.S,0],[D.S,D.H],[0,D.H]],[[D.S*0.55,D.H/2]],D.t,[]);
+  m.v.forEach(v=>{const [x,y,z]=map(v[0],v[1],v[2]);v[0]=x;v[1]=y;v[2]=z;});return fixOut(m);}
+/* built cap-up around the playing-surface corner at (0,0), rails along +x and +y; then turned over so the cap prints on the bed */
+function guardParts(){const D=cornerDims(),{w,c,t,H,S,o,tot}=D,PC=window.polygonClipping,ch=2;
+  /* square from (x0,y0) to (x1,y1) with its outer corner (x0,y0) rounded */
+  const rsq=(x0,y0,x1,y1,r)=>{const p=[[x1,y0]];if(r>0.1){for(let i=0;i<=24;i++){const a=-Math.PI/2-i/24*Math.PI/2;p.push([x0+r+r*Math.cos(a),y0+r+r*Math.sin(a)]);}}else p.push([x0,y0]);p.push([x0,y1],[x1,y1]);return [p];};
+  const R=Math.min(CG.r,o-4);
+  /* hollow post: a square tube with 2 mm walls, open underneath (it prints cap-down, so the open end is at the top of the print) */
+  const pw=CG.post,post=Mesh();extrude(post,PC.difference(rsq(-o,-o,0,0,R),rsq(-o+pw,-o+pw,-pw,-pw,R-pw)),0,H);
+  const a=sleeveWall(D,(u,v,ww)=>[u,-w-c-ww,v]),b=sleeveWall(D,(u,v,ww)=>[-w-c-ww,u,v]);
+  const capPoly=PC.union(rsq(-o,-o,0,0,R),rect(0,-o,S,0),rect(-o,0,0,S)),dec=cornerDeco(D),cap=Mesh(),I=CG.inlay;
+  const parts=[{name:'post',m:post,ext:1},{name:'sleeve A',m:a,ext:1},{name:'sleeve B',m:b,ext:1},{name:'cap',m:cap,ext:1}];
+  if(dec){extrude(cap,capPoly,H,tot-I);const top=PC.difference(capPoly,dec.A,dec.B),ct=Mesh();extrude(ct,top,tot-I,tot);parts.push({name:'cap top',m:ct,ext:1});
+    /* the inlay sits in the top 0.6 mm; after the flip it is the face on the bed */
+    [[dec.A,2,'mandala colour 2'],[dec.B,3,'mandala colour 3']].forEach(([g,e,nm])=>{if(g.length){const m=Mesh();extrude(m,g,tot-I,tot);parts.push({name:nm,m,ext:e});}});}
+  else extrude(cap,capPoly,H,tot);
+  parts.forEach(q=>{q.m.v.forEach(v=>{v[2]=tot-v[2];});q.m.t.forEach(tr=>{const x=tr[1];tr[1]=tr[2];tr[2]=x;});fixOut(q.m);});
+  return parts;}
+function guardPlates(){const parts=guardParts(),sz=centreXY(parts),pitch=Math.max(sz.W,sz.H)+8,settings={wall_loops:'4',sparse_infill_density:'30%'};
+  const cols=Math.max(1,Math.floor((Math.min(st.bedW,st.bedD)-4)/pitch)),per=cols*cols,out=[];
+  for(let q0=0;q0<4;q0+=per){const items=[],cnt=Math.min(per,4-q0),rows=Math.ceil(cnt/cols);
+    for(let q=0;q<cnt;q++){const r=Math.floor(q/cols),cc_=q%cols,inRow=Math.min(cols,cnt-r*cols),nm='Corner '+(q0+q+1);
+      items.push({name:nm,parts:parts.map(x=>({name:nm+' '+x.name,m:x.m,ext:x.ext||1})),settings,cx:st.bedW/2+(cc_-(inRow-1)/2)*pitch,cy:st.bedD/2+((rows-1)/2-r)*pitch});}
+    out.push({name:'Printed corners',items});}
+  return out;}
+function drawGuard(){if(!$('#cgView'))return;const D=cornerDims(),{w,c,t,H,S,o,tot}=D,L=S+70,ox=L+24;
+  /* top view: the corner block, with two square-cut rails sliding in */
+  let g='<rect x="0" y="'+(-w)+'" width="'+L+'" height="'+w+'" fill="var(--wood-edge)" stroke="var(--ink)" stroke-width="0.5"/>'+
+    '<rect x="'+(-w)+'" y="0" width="'+w+'" height="'+L+'" fill="var(--wood-edge)" stroke="var(--ink)" stroke-width="0.5"/>'+
+    '<path d="M'+f2(-o+Math.min(CG.r,o-4))+' '+(-o)+'H'+S+'V0H0V'+S+'H'+(-o)+'V'+f2(-o+Math.min(CG.r,o-4))+'A'+Math.min(CG.r,o-4)+' '+Math.min(CG.r,o-4)+' 0 0 1 '+f2(-o+Math.min(CG.r,o-4))+' '+(-o)+'Z" fill="var(--accent)" fill-opacity=".55" stroke="var(--ink)" stroke-width="0.6"/>'+'<path d="M0 '+(-w)+'V0M'+(-w)+' 0H0" stroke="var(--ink)" stroke-width="1.2"/>'+
+    (()=>{const dec=cornerDeco(D);if(!dec)return '';return '<circle cx="'+f2(dec.cx)+'" cy="'+f2(dec.cy)+'" r="'+f2(dec.R+1.2)+'" fill="'+sk.colors[0]+'"/>'+
+      '<path fill-rule="evenodd" fill="'+sk.colors[1]+'" d="'+multiD(dec.A)+'"/><path fill-rule="evenodd" fill="'+sk.colors[2]+'" d="'+multiD(dec.B)+'"/>';})()+
+    '<text x="'+(S+(L-S)/2)+'" y="'+(-w/2+1.8)+'" font-size="5" text-anchor="middle" fill="var(--ink)">rail</text>'+
+    '<text x="'+(-w/2)+'" y="'+(S+(L-S)/2)+'" font-size="5" text-anchor="middle" fill="var(--ink)" transform="rotate(-90 '+(-w/2)+' '+(S+(L-S)/2)+')">rail</text>'+
+    '<text x="'+(S+8)+'" y="14" font-size="4.6" fill="var(--muted)">square-cut rail ends slide in under the cap</text>';
+  /* side view along a rail: the rail end (dashed) inside the sleeve, under the cap */
+  g+='<rect x="'+ox+'" y="0" width="'+o+'" height="'+tot+'" fill="var(--accent)" stroke="var(--ink)" stroke-width="0.6"/>'+
+    '<rect x="'+(ox+o)+'" y="0" width="'+S+'" height="'+tot+'" fill="var(--accent)" stroke="var(--ink)" stroke-width="0.6"/>'+
+    '<rect x="'+(ox+o)+'" y="'+(tot-H+c)+'" width="'+(S+24)+'" height="'+(H-c)+'" fill="var(--wood-edge)" fill-opacity=".55" stroke="var(--ink)" stroke-width="0.5" stroke-dasharray="2 1.5"/>'+
+    '<circle cx="'+f2(ox+o+S*0.55)+'" cy="'+f2(tot-H/2)+'" r="'+CS_HEAD/2+'" fill="var(--panel)" stroke="var(--ink)" stroke-width="0.5"/><circle cx="'+f2(ox+o+S*0.55)+'" cy="'+f2(tot-H/2)+'" r="'+CS_CLEAR/2+'" fill="var(--hole)"/>'+
+    '<text x="'+(ox+(o+S)/2)+'" y="'+(tot+8)+'" font-size="4.6" text-anchor="middle" fill="var(--muted)">'+f1(tot)+' mm high with the cap</text>';
+  $('#cgView').setAttribute('viewBox',(-o-6)+' '+(-o-6)+' '+(ox+o+S+40)+' '+(Math.max(L+o,tot+16)+10));$('#cgView').innerHTML=g;
+  $('#cgNote').textContent='Block '+f1(2*o)+' mm across the corner, '+f1(tot)+' mm high: rail stock '+f1(railStock())+' mm + '+CG.cap+' mm cap (from Rails (fences) in the settings). Cut all 4 rails square, '+f1(G.L)+' mm long. Screws: 2 per corner (see Screws in the settings).';}
+/* rail sizes live in the settings panel (Design and Print tabs) */
+function goRails(){if(!['design','print'].includes(document.body.dataset.tab))showTab('design');$('#railSet').open=true;$('#railSet').scrollIntoView({behavior:'smooth',block:'center'});setTimeout(()=>$('#rW').focus({preventScroll:true}),400);}
+$('#cgRails').addEventListener('click',goRails);
+/* screw choice: head shape and length */
+(function(){const redraw=()=>{applyScrew();drawUnder();drawHolder();drawGuard();drawScrews();};
+  const mark=()=>document.querySelectorAll('#scrHead button').forEach(b=>b.setAttribute('aria-pressed',String((b.dataset.cs==='1')===scr.cs)));
+  document.querySelectorAll('#scrHead button').forEach(b=>b.addEventListener('click',()=>{scr.cs=b.dataset.cs==='1';mark();redraw();}));
+  $('#scrLen').addEventListener('change',e=>{const v=parseFloat(e.target.value);if(!isNaN(v))scr.len=Math.min(60,Math.max(8,v));e.target.value=scr.len;redraw();});mark();})();
+(function(){const sel=$('#cgDeco');[['match','Match the striker'],['none','None (one colour)']].concat(Object.keys(STRIKERS).map(k=>[k,STRIKERS[k].name])).forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;sel.appendChild(o);});
+  sel.value=CG.deco;sel.addEventListener('change',()=>{CG.deco=sel.value;drawGuard();});})();$('#railsEdit').addEventListener('click',goRails);
+$('#cg3mfBtn').addEventListener('click',async()=>{if(!window.JSZip){toast('The 3MF writer could not load.');return;}
+  try{const pl=guardPlates();pl.colours=cornerDeco(cornerDims())?sk.colors.slice():['#F2B705'];const blob=await bambu3MF(pl,'blob');save('carrom-printed-corners-'+Math.round(railStock())+'mm.3mf',blob);}
+  catch(e){toast('Could not build the corners. '+(e&&e.message||''));}});
 function footSVG(d,H,ox){let side;
   if(d==='offset'){const {d:dd,k}=offsetHexRings(),a=OFFHEX.top*k,b=OFFHEX.bottom*k;side=[[ox-a,0],[ox+a,0],[ox-dd+b,H],[ox-a,H]];}
   else{const P=footProfile(d,H);side=P.map(([r,z])=>[ox+r,z]).concat(P.slice().reverse().map(([r,z])=>[ox-r,z]));}
   return '<path d="'+ringD(side)+'" fill="var(--wood)" stroke="var(--ink)" stroke-width="0.6" stroke-linejoin="round"/>'+
-    '<rect x="'+f2(ox-36)+'" y="0" width="72" height="5" rx="1" fill="var(--wood)" stroke="var(--ink)" stroke-width="0.6"/>';}
+    '<rect x="'+f2(ox-36)+'" y="0" width="72" height="'+FOOT_T+'" rx="1" fill="var(--wood)" stroke="var(--ink)" stroke-width="0.6"/>';}
 function drawUnder(){if(!$('#ubView')||!window.polygonClipping)return;const R=rimShape(),H=ub.fh,ox=R.s+64;
   let g='<path d="'+ringD(R.outline)+'" fill="var(--wood)" stroke="var(--ink)" stroke-width="0.6"/>'+
     '<circle cx="'+f2(R.c)+'" cy="'+f2(R.c)+'" r="'+f2(R.ro)+'" fill="var(--wood-edge)" stroke="var(--ink)" stroke-width="0.6"/>'+
     '<circle cx="'+f2(R.c)+'" cy="'+f2(R.c)+'" r="'+f2(R.ri)+'" fill="var(--hole)"/>'+
     R.screws.map(([x,y])=>'<circle cx="'+f2(x)+'" cy="'+f2(y)+'" r="'+CS_HEAD/2+'" fill="none" stroke="var(--ink)" stroke-width="0.5"/><circle cx="'+f2(x)+'" cy="'+f2(y)+'" r="'+CS_CLEAR/2+'" fill="var(--hole)"/>').join('')+
+    (ub.joined?'<circle cx="'+f2(R.fx)+'" cy="'+f2(R.fx)+'" r="19" fill="var(--accent)" stroke="var(--ink)" stroke-width="0.6"/><text x="'+f2(R.fx)+'" y="'+f2(R.fx+1.8)+'" font-size="5.5" text-anchor="middle" fill="var(--accent-ink)">foot</text>':'')+
     '<line x1="'+f2(ox-46)+'" y1="0" x2="'+f2(ox+46)+'" y2="0" stroke="var(--muted)" stroke-width="0.8" stroke-dasharray="3 2"/>'+footSVG(ub.foot,H,ox);
-  const x0=-R.e-2,W=ox+40-x0,Hh=Math.max(R.s,65)+4;
+  const x0=-R.e-2,W=ox+40-x0,Hh=Math.max(R.s,ub.joined?R.fx+26:0,65)+4;
   $('#ubView').setAttribute('viewBox',f2(x0)+' -4 '+f2(W)+' '+f2(Hh));$('#ubView').innerHTML=g;
   $('#ubCap').textContent='Pocket rim from below · '+FEET[ub.foot].name+' foot from the side, '+H+' mm';
   const box=$('#feet');box.innerHTML='';
@@ -1490,10 +1656,13 @@ function drawUnder(){if(!$('#ubView')||!window.polygonClipping)return;const R=ri
     b.addEventListener('click',()=>{ub.foot=k;drawUnder();});box.appendChild(b);});
   document.querySelectorAll('#fhseg button').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.h===H)));
   const room=H-RIM.h;
-  $('#ubNote').textContent='Rim '+f1(R.s+R.e)+' × '+f1(R.s+R.e)+' × '+RIM.h+' mm, hole Ø'+f1(2*R.ri)+'. Foot Ø72 × '+H+' mm. Room under the rim for the bag: '+room+' mm. '+
+  if($('#sockNote')){const deep=Math.max(0,room-5);$('#sockCollar').textContent=Math.round(2*R.ro);
+    $('#sockNote').textContent='With '+H+' mm feet there is '+room+' mm under the collar. Keep the bag about '+Math.round(deep/10)+' cm deep below the collar, so it does not touch the table: cut the toe piece about '+Math.round((deep+30)/10)+' cm long, with 3 cm to wrap over the collar.'+(room<40?' Taller feet (Print tab) give room for deeper bags.':'');}
+  $('#ubNote').textContent=(ub.joined?'Rim with its foot: one part per corner, 3 screws each, no separate feet. The foot stands '+f1(R.fx)+' mm in from both edges. ':'Rim '+f1(R.s+R.e)+' × '+f1(R.s+R.e)+' × '+RIM.h+' mm, hole Ø'+f1(2*R.ri)+'. Foot Ø72 × '+H+' mm. ')+'Room under the rim for the bag: '+room+' mm. '+
     (room<50?'A normal cloth bag hangs about 50 mm, so make the bag shallower, about '+Math.max(0,room-3)+' mm deep, or it touches the table.':'A 50 mm deep cloth bag fits.')+
     (R.corner?' The 4th screw, at the corner, goes into the '+(st.m>0?'panel':'bottom of the rail')+'.':' Only 3 screws: '+(R.e===0?'your rails hang below the panel, so the rim plate stops at the panel edge.':'there is not enough room under the rail for a corner screw.'));}
 document.querySelectorAll('#fhseg button').forEach(b=>b.addEventListener('click',()=>{ub.fh=+b.dataset.h;drawUnder();}));
+$('#ubJoin').addEventListener('change',e=>{ub.joined=e.target.checked;$('#ub3mfBtn').textContent=ub.joined?'Download 4 pocket rims with feet (.3mf)':'Download 4 pocket rims + 4 feet (.3mf)';drawUnder();});
 $('#ub3mfBtn').addEventListener('click',async()=>{if(!window.JSZip){toast('The 3MF writer could not load.');return;}
   try{const pl=ubPlates();pl.colours=['#F2B705'];const blob=await bambu3MF(pl,'blob');save('carrom-pocket-rims-and-feet-'+ub.foot+'-'+ub.fh+'mm.3mf',blob);}
   catch(e){toast('Could not build the parts. '+(e&&e.message||''));}});
@@ -1507,6 +1676,7 @@ function drawRails(){if(!$('#rails'))return;const L=G.L,w=rail.w,onPanel=st.m>0,
     ['Rail stock height',f1(stock)+' mm'+(onPanel?' (the rail sits on the panel)':' ('+f1(rail.h)+' above + '+f1(rail.t)+' panel'+(rail.b?' + '+f1(rail.b)+' below':'')+')')],
     ['Mitred corners (45°)','4 rails, '+f1(L+2*w)+' mm long outside, '+f1(L)+' mm inside'],
     ['Butt joints','2 rails '+f1(L)+' mm + 2 rails '+f1(L+2*w)+' mm'],
+    ['Printed corners','4 rails '+f1(L)+' mm, cut square (see Printed corners on the Print tab)'],
     ['Outside size of the board',f1(L+2*w)+' × '+f1(L+2*w)+' mm'],
     ['Rail marks','Not in the official rules. Optional aiming marks. Mark the centre first, then measure out to both sides:'],
     ['Centre mark','At the middle of each rail ('+f1(L/2)+' mm from the playing-surface corner), in line with the centre lines'],
@@ -1536,7 +1706,7 @@ function drawRails(){if(!$('#rails'))return;const L=G.L,w=rail.w,onPanel=st.m>0,
 function railMarks(){return rail.marks;}
 document.querySelectorAll('#rmseg button').forEach(b=>b.addEventListener('click',()=>{rail.marks=b.dataset.m;drawRails();drawBoard();}));
 [['rW','w'],['rH','h'],['rT','t'],['rB','b']].forEach(([id,key])=>{$('#'+id).addEventListener('change',e=>{const v=parseFloat(e.target.value);
-  if(!isNaN(v))rail[key]=Math.min(+e.target.max,Math.max(+e.target.min,v));e.target.value=rail[key];drawRails();drawUnder();});});
+  if(!isNaN(v))rail[key]=Math.min(+e.target.max,Math.max(+e.target.min,v));e.target.value=rail[key];applyScrew();drawRails();drawUnder();drawGuard();drawScrews();});});
 
 /* ---------- rulebook: print on A5, or save as PDF from the print window ---------- */
 function fillCover(){if(!$('#rcover'))return;const ov=st.overlay;st.overlay=false;const {s,pad}=boardMarkup(false);st.overlay=ov;const L=G.L;
@@ -1654,6 +1824,85 @@ const bedSel=$('#bed');
 function setBed(w,d){st.bedW=Math.min(500,Math.max(120,w||256));st.bedD=Math.min(500,Math.max(120,d||256));$('#bedW').value=st.bedW;$('#bedD').value=st.bedD;update();}
 bedSel.addEventListener('change',()=>{const c=bedSel.value==='custom';$('#bedCustom').hidden=!c;if(!c){const [w,d]=bedSel.value.split('x').map(Number);setBed(w,d);}});
 ['bedW','bedD'].forEach(id=>$('#'+id).addEventListener('change',()=>setBed(+$('#bedW').value,+$('#bedD').value)));
+
+/* ---------- help bubbles: point at a setting to see what it is, and where it is on the board ---------- */
+const HELP={
+  size:['Playing surface','The square inside the rails where you play. Official: 740 mm. Home boards are often 600 mm.'],
+  presets:['Size preset','One click for a home board, or for the official competition sizes.'],
+  bed:['Printer bed','The size of your 3D printer bed, drawn on the board to scale. Stencils bigger than this are cut into parts.'],
+  designs:['Centre design','The pattern painted in the middle of the board.'],
+  kseg:['Number of colours','How many paints the centre design uses. Each colour is one stencil layer.'],
+  palette:['Colours','The paint colours. Pick a set, or click a colour to change it.'],
+  overlay:['Show stencil pieces','Draws a dashed outline where each stencil sits on the board.'],
+  lean:['Lean stencils','Keeps only a rim of plastic around the paint holes. Uses about a third of the plastic. You mask the rest with paper and tape.'],
+  pocket:['Pocket hole','Diameter of the 4 corner holes. Official: 44.5 mm.'],
+  striker:['Striker','Diameter of the striker you flick. Official: up to 41.3 mm. Used for the striker print.'],
+  coin:['Coin','Diameter of the coins. Official: 30.2 to 31.8 mm. Used for the coin prints and the smallest centre design.'],
+  gap:['Baseline gap','Distance between the 2 baselines on each side, centre to centre. Official: 31.8 mm. The striker sits between them.'],
+  lw:['Line width','Thickness of the painted lines.'],
+  mandala:['Centre design size','Diameter of the centre design. Leave it blank for the automatic size.'],
+  overhang:['Panel under the frame','How far the plywood runs under each rail. 0 means the panel stops at the edge of the playing surface.'],
+  pilot:['Centre (pilot) hole','The small hole you drill first at each pocket centre. It guides the hole saw.'],
+  stT:['Stencil thickness','How thick the paint stencils print. 0.8 mm works well.'],
+  sawClear:['Hole saw guide gap','Extra room around the hole saw inside the guide, so the saw turns freely.'],
+  rim:['Lean stencil rim','How much plastic stays around the paint holes on lean stencils.'],
+  rW:['Rail width','Width of each rail (fence), seen from above. Official: 63.5 to 76 mm.'],
+  rH:['Height above the surface','How far the rails stand up above the playing surface. Official: 19 to 25.4 mm.'],
+  rT:['Panel thickness','Thickness of your board panel, for example 21 mm plywood.'],
+  rB:['Rail below the panel','How far the rails hang below the bottom of the panel. 0 means flush.'],
+  scrHead:['Screw head','Countersunk heads sit flush in a cone. Flat heads (pan heads) sit on top of the part.'],
+  scrLen:['Screw length','Total length of the screw. The table below checks that it bites well and never comes through the playing surface.'],
+};
+let hlKey=null;
+/* the highlight layer drawn on top of the board preview */
+function applyHL(){const sv=$('#board');if(!sv)return;const old=sv.querySelector('#hl');if(old)old.remove();if(!hlKey||!G)return;
+  const L=G.L,m=st.m,pad=m+Math.max(48,L*0.08),fs=L/26,c=G.c;
+  const ln='fill="none" stroke="#141414" stroke-width="7" vector-effect="non-scaling-stroke" stroke-linejoin="round"',
+        hi='fill="none" stroke="var(--accent)" stroke-width="3.5" vector-effect="non-scaling-stroke" stroke-linejoin="round"';
+  const two=d=>'<path d="'+d+'" '+ln+'/><path d="'+d+'" '+hi+'/>';
+  const circD=(x,y,r)=>'M'+f2(x-r)+' '+f2(y)+'a'+f2(r)+' '+f2(r)+' 0 1 0 '+f2(2*r)+' 0a'+f2(r)+' '+f2(r)+' 0 1 0 '+f2(-2*r)+' 0';
+  const rectD=(x0,y0,x1,y1)=>'M'+f2(x0)+' '+f2(y0)+'H'+f2(x1)+'V'+f2(y1)+'H'+f2(x0)+'Z';
+  const label=(x,y,t)=>'<text x="'+f2(x)+'" y="'+f2(y)+'" font-size="'+f2(fs)+'" font-weight="700" text-anchor="middle" dominant-baseline="central" fill="var(--accent)" stroke="#141414" stroke-width="'+f2(fs*0.18)+'" paint-order="stroke">'+t+'</text>';
+  const pk=[[G.rp,G.rp],[L-G.rp,G.rp],[G.rp,L-G.rp],[L-G.rp,L-G.rp]];
+  const band=(o,i)=>'<path fill-rule="evenodd" d="'+rectD(-o,-o,L+o,L+o)+rectD(-i,-i,L+i,L+i)+'" fill="var(--accent)" fill-opacity=".45" stroke="#141414" stroke-width="2" vector-effect="non-scaling-stroke"/>';
+  let g='';const k=hlKey;
+  if(k==='size'||k==='presets')g=two(rectD(0,0,L,L))+label(L/2,-pad/2,Math.round(L)+' mm');
+  else if(k==='bed')g='<path d="'+rectD(0,0,st.bedW,st.bedD)+'" fill="var(--accent)" fill-opacity=".3"/>'+two(rectD(0,0,st.bedW,st.bedD))+label(st.bedW/2,st.bedD/2,st.bedW+' × '+st.bedD);
+  else if(['designs','kseg','palette','mandala'].includes(k))g=two(circD(c,c,G.Rm))+label(c,c-G.Rm-fs,'Ø'+Math.round(2*G.Rm));
+  else if(['overlay','lean','stT','rim'].includes(k))g=PIECES.map(p=>two(multiD(p.board))).join('');
+  else if(k==='pocket')g=pk.map(([x,y])=>two(circD(x,y,G.rp))).join('')+label(L/2,G.rp,'Ø'+f1(st.pocket));
+  else if(k==='pilot')g=pk.map(([x,y])=>two(circD(x,y,Math.max(st.pilot/2,4))+'M'+f2(x-12)+' '+f2(y)+'H'+f2(x+12)+'M'+f2(x)+' '+f2(y-12)+'V'+f2(y+12))).join('');
+  else if(k==='sawClear')g=pk.map(([x,y])=>two(circD(x,y,(st.pocket+st.sawClear)/2+2))).join('');
+  else if(k==='striker'){const y=L-G.cyB;g=two(circD(L/2,y,st.striker/2))+label(L/2,y-st.striker/2-fs,'Ø'+f1(st.striker));}
+  else if(k==='coin'){const r=st.coin/2;g=[[0,0]].concat([0,1,2,3,4,5].map(i=>[2*r*Math.cos(i*TAU/6),2*r*Math.sin(i*TAU/6)])).map(([x,y])=>two(circD(c+x,c+y,r))).join('')+label(c,c-3*r-fs,'Ø'+f1(st.coin));}
+  else if(k==='gap'||k==='lw'){const sides=sideShapes(G);for(let q=0;q<4;q++)sides.forEach(x=>{if(x.c===0)g+=two(polyD(rotPoly(x.p,L,q)));});
+    if(k==='gap')g+=label(L/2,L-G.o-G.g/2,f1(st.gap)+' mm');}
+  else if(k==='overhang')g=m>0?two(rectD(-m,-m,L+m,L+m))+label(L/2,-m/2,m+' mm'):two(rectD(0,0,L,L))+label(L/2,-pad/2,'0: panel = playing surface');
+  else if(k==='rT')g='<path d="'+rectD(-m,-m,L+m,L+m)+'" fill="var(--accent)" fill-opacity=".25"/>'+two(rectD(-m,-m,L+m,L+m))+label(L/2,L/2,'panel '+f1(rail.t)+' mm');
+  else if(['rW','rH','rB'].includes(k))g=band(pad,m)+label(L/2,-pad/2,k==='rW'?f1(rail.w)+' mm wide':k==='rH'?f1(rail.h)+' mm above':f1(rail.b)+' mm below');
+  if(g)sv.insertAdjacentHTML('beforeend','<g id="hl" pointer-events="none">'+g+'</g>');}
+/* which element on the page belongs to which help entry */
+function helpTargets(){const out=[];
+  ['size','presets','bed','designs','kseg','palette'].forEach(k=>{const el=$('#'+k);const f=el&&el.closest('.field');if(f)out.push([k,f]);});
+  ['overlay','lean'].forEach(k=>{const el=$('#'+k);if(el)out.push([k,el.closest('label')||el]);});
+  ['pocket','striker','coin','gap','lw','mandala','overhang','pilot','stT','sawClear','rim','rW','rH','rT','rB','scrHead','scrLen'].forEach(k=>{const el=$('#'+k),lb=document.querySelector('label[for="'+k+'"]');if(el)out.push([k,el.closest('.row')||el]);if(lb)out.push([k,lb]);});
+  return out;}
+function showHelp(k,el){const tip=$('#tip'),h=HELP[k];if(!h)return;hlKey=k;applyHL();
+  document.querySelectorAll('[data-help].hl-on').forEach(x=>x.classList.remove('hl-on'));document.querySelectorAll('[data-help="'+k+'"]').forEach(x=>x.classList.add('hl-on'));
+  tip.innerHTML='<b>'+h[0]+'</b>'+h[1]+(window.innerWidth>900&&document.body.dataset.tab==='design'?'<small>Highlighted on the board.</small>':'');
+  /* the bubble sits just under the setting, inside the settings column, so the board stays clear */
+  const r=el.getBoundingClientRect(),col=(el.closest('.panel')||el).getBoundingClientRect();
+  tip.style.maxWidth=Math.max(220,Math.min(320,col.width-16))+'px';tip.classList.add('show');tip.setAttribute('aria-hidden','false');
+  const tw=tip.offsetWidth,th=tip.offsetHeight;
+  let x=Math.min(Math.max(col.left+8,12),window.innerWidth-tw-12),y=r.bottom+6;if(y+th>window.innerHeight-12)y=Math.max(76,r.top-th-6);
+  tip.style.left=x+'px';tip.style.top=y+'px';}
+function hideHelp(){const tip=$('#tip');tip.classList.remove('show');tip.setAttribute('aria-hidden','true');hlKey=null;applyHL();
+  document.querySelectorAll('[data-help].hl-on').forEach(x=>x.classList.remove('hl-on'));}
+helpTargets().forEach(([k,el])=>{el.dataset.help=k;
+  el.addEventListener('mouseenter',()=>showHelp(k,el));el.addEventListener('mouseleave',()=>{if(!el.contains(document.activeElement))hideHelp();});
+  el.addEventListener('focusin',()=>showHelp(k,el));el.addEventListener('focusout',e=>{if(!el.contains(e.relatedTarget))hideHelp();});});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')hideHelp();});
+window.addEventListener('scroll',()=>{if($('#tip').classList.contains('show')&&!document.activeElement.closest('[data-help]'))hideHelp();},{passive:true});
 
 /* ---------- step tabs ---------- */
 const TABS=['design','print','build','play'];
