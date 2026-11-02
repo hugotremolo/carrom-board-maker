@@ -65,7 +65,7 @@ select{width:auto}
 .linkbtn{font:inherit;font-weight:600;color:var(--ink);background:none;border:0;padding:0 2px;text-decoration:underline;text-underline-offset:3px;cursor:pointer;min-height:32px}
 .rmwhy{margin:0;padding-left:1.2em;display:grid;gap:6px;font-size:13.5px;color:var(--muted);max-width:75ch}
 .rmwhy b{color:var(--ink)}
-#ubView,#holdView,#railView,#cgView{width:100%;height:auto;display:block}
+#ubView,#holdView,#railView,#cgView,#bxView{width:100%;height:auto;display:block}
 .seg button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
 .designs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .dbtn{display:grid;justify-items:center;gap:4px;padding:8px}
@@ -413,6 +413,7 @@ td:last-child{font-family:var(--mono);font-variant-numeric:tabular-nums;font-siz
         <label class="check" style="margin-top:6px"><input type="checkbox" id="projUnder" checked> Add 4 pocket rims and 4 feet</label>
         <label class="check" style="margin-top:6px"><input type="checkbox" id="projHolder" checked> Add the rulebook holder</label>
         <label class="check" style="margin-top:6px"><input type="checkbox" id="projGuards"> Add 4 printed corners</label>
+        <label class="check" style="margin-top:6px"><input type="checkbox" id="projBox"> Add the storage box</label>
       </div>
       <p class="note" id="dlnote" hidden>Downloads aren't available in this view. Open the page on claude.ai to save files.</p>
       <p class="note">The pack holds every stencil below, the full-size board, and a README with the order of work. The Bambu Studio project has every piece already at its thickness, packed onto build plates, plus the striker with its 3 colour parts. Open it, pick your filaments, and slice plate by plate. For single SVGs: stencils at the stencil thickness (TPU seals best; PETG works), marking template 1.2 mm, hole saw guide 6 mm (10 mm with lean stencils off).</p>
@@ -526,6 +527,22 @@ td:last-child{font-family:var(--mono);font-variant-numeric:tabular-nums;font-siz
             <button class="btn primary" id="cg3mfBtn" data-dl type="button">Download 4 printed corners (.3mf)</button>
           </div>
           <p class="note">No mitres needed: cut the 4 rails square, all the same length, and slide their ends into the corners. The inside faces stay flush with the rails, so the bounce is the same. Glue the rail ends and screw through the sleeves. The top design is a simple motif in the style of your striker, inlaid 0.6 mm deep in the cap, in the striker colours. It prints face down on the bed, so it comes out crisp. It needs an AMS; pick None for one colour. Set the rail sizes first (settings panel, "Rails (fences)"). Print as it comes, cap on the bed, no supports. PETG or PLA, 4 walls. Drill pilot holes into the rails. With 4-screw pocket rims, the corner screw goes into the printed corner.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel" aria-label="Storage box" data-tabs="print">
+      <h2>Storage box (3D print)</h2>
+      <div class="sgrid">
+        <div>
+          <svg id="bxView" role="img" aria-label="Storage box from above without its lid: 19 coins on edge in 2 rows, and 2 strikers"></svg>
+        </div>
+        <div class="field">
+          <p class="weight" id="bxNote"></p>
+          <div class="exports">
+            <button class="btn primary" id="bx3mfBtn" data-dl type="button">Download box + lid (.3mf)</button>
+          </div>
+          <p class="note">Holds the 19 coins standing on edge in 2 rows, and 2 strikers lying flat. The lid slides in from the front along 45° grooves, so nothing needs supports, and stops at the back wall. Push it with your thumb in the dip. The sizes follow your coins and striker. The lid has a small inlaid star in your striker colours (AMS).</p>
         </div>
       </div>
     </section>
@@ -802,7 +819,7 @@ const PALETTES={
 };
 const TIERS={2:[1,0,1,0,0],3:[1,2,0,2,0],4:[1,2,3,2,0],5:[1,2,3,4,0]};
 const CNAMES=['Lines','Red accent','Colour 3','Colour 4','Colour 5'];
-const st={L:600,design:'lotus',k:3,pal:'bright',colors:PALETTES.bright.c.slice(),pocket:45,lw:2,gap:31.8,coin:31,striker:41,m:0,pilot:6.5,sawClear:1,stT:0.8,lean:true,rim:25,bedW:256,bedD:256,mandalaD:0,overlay:true};
+const st={L:600,design:'lotus',k:3,pal:'bright',colors:PALETTES.bright.c.slice(),pocket:45,lw:2,gap:31.8,coin:31,striker:41,m:0,pilot:6.5,sawClear:1,stT:0.8,lean:true,jp:false,rim:25,bedW:256,bedD:256,mandalaD:0,overlay:true};
 const $=s=>document.querySelector(s);
 const f1=n=>(Math.round(n*10)/10).toFixed(1);
 const f2=n=>(Math.round(n*100)/100).toString();
@@ -1010,7 +1027,7 @@ function drawBoard(){const {s,pad}=boardMarkup(false);const sv=$('#board');const
 function boardSVG(){const L=G.L,m=st.m,W=L+2*m;const {s}=boardMarkup(true);
   return '<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="'+f2(W)+'mm" height="'+f2(W)+'mm" viewBox="'+f2(-m)+' '+f2(-m)+' '+f2(W)+' '+f2(W)+'">'+s+'</svg>\n';}
 function drawDesigns(){const box=$('#designs');box.innerHTML='';
-  Object.keys(DESIGNS).forEach(k=>{const b=document.createElement('button');b.type='button';b.className='dbtn';b.setAttribute('aria-pressed',String(st.design===k));
+  Object.keys(DESIGNS).filter(k=>st.jp||!DESIGNS[k].jp).forEach(k=>{const b=document.createElement('button');b.type='button';b.className='dbtn';b.setAttribute('aria-pressed',String(st.design===k));
     const map=TIERS[st.k];const sh=DESIGNS[k].build(45,45,42,8.6);let s='<svg viewBox="0 0 90 90" aria-hidden="true"><circle cx="45" cy="45" r="45" fill="var(--wood)"/>';
     sh.forEach(x=>{s+='<path fill-rule="evenodd" fill="'+st.colors[map[x.t]]+'" d="'+polyD(x.p)+'"/>';});
     b.innerHTML=s+'</svg><span>'+DESIGNS[k].name+'</span>';b.addEventListener('click',()=>{st.design=k;update();});box.appendChild(b);});}
@@ -1070,7 +1087,7 @@ function readme(){const L=G.L,m=st.m;let t='CARROM STENCIL PACK - '+Math.round(L
 
 let pt=null;
 function update(colorOnly){G=geom();SH=paintShapes(G);try{markPreset();}catch(e){}
-  drawSwatches();drawDesigns();drawDims();drawCoins();applyScrew();drawUnder();drawHolder();drawGuard();drawRails();drawScrews();fillCover();
+  drawSwatches();drawDesigns();drawDims();drawCoins();applyScrew();drawUnder();drawHolder();drawGuard();drawBox();drawRails();drawScrews();fillCover();
   clearTimeout(pt);
   if(colorOnly){drawBoard();drawPieces();return;}
   drawBoard();
@@ -1269,14 +1286,14 @@ function drawStriker(){if(!window.polygonClipping)return;
   $('#strikerView').innerHTML=strikerSVG(sk.design,true);
   $('#strikerCap').textContent=STRIKERS[sk.design].name+', Ø'+f1(sk.D)+' mm, bottom face';
   const box=$('#sdesigns');box.innerHTML='';
-  Object.keys(STRIKERS).forEach(k=>{const b=document.createElement('button');b.type='button';b.className='dbtn';b.setAttribute('aria-pressed',String(sk.design===k));
+  Object.keys(STRIKERS).filter(k=>st.jp||!STRIKERS[k].jp).forEach(k=>{const b=document.createElement('button');b.type='button';b.className='dbtn';b.setAttribute('aria-pressed',String(sk.design===k));
     const r=sk.D/2;b.innerHTML='<svg viewBox="'+f2(-r)+' '+f2(-r)+' '+f2(2*r)+' '+f2(2*r)+'" aria-hidden="true">'+strikerSVG(k,false)+'</svg><span>'+STRIKERS[k].name+'</span>';
-    b.addEventListener('click',()=>{sk.design=k;drawStriker();drawGuard();});box.appendChild(b);});
+    b.addEventListener('click',()=>{sk.design=k;drawStriker();drawGuard();drawBox();});box.appendChild(b);});
   const v=strikerBody(null).volume()/1000;
   $('#sweight').textContent='Weight at 100% infill: about '+(v*1.24).toFixed(1)+' g in PLA, '+(v*1.27).toFixed(1)+' g in PETG';}
 function drawSwatchesS(){const box=$('#sswatch');box.innerHTML='';
   sk.colors.forEach((c,i)=>{const d=document.createElement('div');d.className='sw';d.innerHTML='<input type="color" id="sc'+i+'" value="'+c+'"><label for="sc'+i+'">'+SNAMES[i]+'</label>';
-    d.querySelector('input').addEventListener('input',ev=>{sk.colors[i]=ev.target.value;drawStriker();drawGuard();});box.appendChild(d);});}
+    d.querySelector('input').addEventListener('input',ev=>{sk.colors[i]=ev.target.value;drawStriker();drawGuard();drawBox();});box.appendChild(d);});}
 [['sD','D'],['sH','H'],['sI','inlay']].forEach(([id,key])=>{$('#'+id).addEventListener('change',e=>{const v=parseFloat(e.target.value);
   if(!isNaN(v))sk[key]=Math.min(+e.target.max,Math.max(+e.target.min,v));e.target.value=sk[key];drawStriker();});});
 const stag=()=>'striker'+f2(sk.D).replace('.','_')+'-'+sk.design;
@@ -1306,7 +1323,7 @@ function pieceMesh(p,rot){const h=p.height||st.stT;
   let mp=p.geom.map(poly=>poly.map(r=>r.map(([x,y])=>rot?[p.H-y,p.W-x]:[x,p.H-y])));
   const W=rot?p.H:p.W,H=rot?p.W:p.H;mp=mp.map(poly=>poly.map(r=>r.map(([x,y])=>[x-W/2,y-H/2])));
   const m=Mesh();extrude(m,mp,0,h);return m;}
-function projectPlates(withStriker,withCoins,withUnder,withHolder,withGuards){
+function projectPlates(withStriker,withCoins,withUnder,withHolder,withGuards,withBox){
   const items=PIECES.map(p=>({kind:'piece',p,w:p.W,h:p.H,name:p.file.replace(/\.svg$/,'')}));
   const plates=packPlates(items).map(pl=>{
     const x0=Math.min(...pl.items.map(i=>i.spot.x)),y0=Math.min(...pl.items.map(i=>i.spot.y)),x1=Math.max(...pl.items.map(i=>i.spot.x+i.spot.w)),y1=Math.max(...pl.items.map(i=>i.spot.y+i.spot.h));
@@ -1323,6 +1340,7 @@ function projectPlates(withStriker,withCoins,withUnder,withHolder,withGuards){
   if(withUnder)plates.push(...ubPlates());
   if(withHolder)plates.push(...holderPlates());
   if(withGuards){plates.push(...guardPlates());if(cornerDeco(cornerDims())&&cols.length<3)sk.colors.slice(cols.length).forEach(c=>cols.push(c));}
+  if(withBox){plates.push(...boxPlates());if(boxDecoOn()&&cols.length<3)sk.colors.slice(cols.length).forEach(c=>cols.push(c));}
   plates.colours=cols.length?cols:['#F2B705'];
   return plates;}
 /* Bambu Studio needs full project settings: standard Bambu Lab P2S 0.4 presets (0.20mm Standard, Generic PLA), supports off */
@@ -1370,13 +1388,15 @@ function bambu3MF(plates,type){
   return z.generateAsync({type:type||'blob',compression:'DEFLATE'});}
 
 $('#projBtn').addEventListener('click',async()=>{if(!window.JSZip||!PIECES.length){toast('The pieces are still being prepared.');return;}
-  try{const pl=projectPlates($('#projStriker').checked,$('#projCoins').checked,$('#projUnder').checked,$('#projHolder').checked,$('#projGuards').checked);const blob=await bambu3MF(pl,'blob');save('carrom'+Math.round(G.L)+'-project.3mf',blob);toast('Saved project with '+pl.length+' plates');}
+  try{const pl=projectPlates($('#projStriker').checked,$('#projCoins').checked,$('#projUnder').checked,$('#projHolder').checked,$('#projGuards').checked,$('#projBox').checked);const blob=await bambu3MF(pl,'blob');save('carrom'+Math.round(G.L)+'-project.3mf',blob);toast('Saved project with '+pl.length+' plates');}
   catch(e){toast('Could not build the project. '+(e&&e.message||''));}});
 
 /* ---------- coins (3D print): 9 white, 9 black, 1 queen; grooves on the top face like wooden carrom men ---------- */
 const cc={design:'rings',H:8.3,depth:1,target:5.2,colors:['#efe6d2','#232325','#c8102e']};
 const CCNAMES=['White coins','Black coins','Queen'];
 const COINS={plain:{name:'Plain'},rings:{name:'Rings'},waves:{name:'Waves'}};
+/* the queen gets her own version of some designs (the sun, a third horn) */
+const queenOf=d=>COINS[d]&&COINS[d].queen?d+'Q':d;
 function coinGrooves(design,R){const g=0.5,out=[];const ring=r=>out.push(annulus(0,0,r-g,r+g));
   const wave=(r,a,k)=>{const n=240,o=[],i=[];for(let j=0;j<n;j++){const t=j/n*TAU,rr=r+a*Math.sin(k*t);o.push([(rr+g)*Math.cos(t),(rr+g)*Math.sin(t)]);i.push([(rr-g)*Math.cos(t),(rr-g)*Math.sin(t)]);}out.push([o,i.reverse()]);};
   if(design==='rings'){ring(0.30*R);ring(0.60*R);ring(0.86*R);}
@@ -1403,12 +1423,12 @@ function coinInfill(m){const R=st.coin/2,V=m.volume(),core=Math.PI*Math.pow(Math
   const need=cc.target/1.24*1000,f=core>0?(need-shell)/core:1;
   return {full:V/1000*1.24,shellG:shell/1000*1.24,pct:Math.max(10,Math.min(100,Math.round(f*20)*5)),low:f<0.1,high:f>1};}
 /* one plate per colour: no filament swaps, so no purge waste */
-function coinPlates(extBase){const m=coinMesh(),inf=coinInfill(m),pitch=st.coin+6;
+function coinPlates(extBase){const m=coinMesh(),inf=coinInfill(m),pitch=st.coin+6,mq=queenOf(cc.design)!==cc.design?(()=>{const d=cc.design;cc.design=queenOf(d);const q=coinMesh();cc.design=d;return q;})():m;
   const settings={sparse_infill_density:inf.pct+'%',wall_loops:'3',top_shell_layers:'7',bottom_shell_layers:'7'};
   const grid=(n,label,k)=>{const cols=Math.ceil(Math.sqrt(n)),rows=Math.ceil(n/cols),items=[];
     for(let q=0;q<n;q++){const r=Math.floor(q/cols),c=q%cols,inRow=Math.min(cols,n-r*cols);
       const nm=n>1?label+' '+(q+1):label;
-      items.push({name:nm,parts:[{name:nm,m,ext:extBase+k+1}],settings,cx:st.bedW/2+(c-(inRow-1)/2)*pitch,cy:st.bedD/2+((rows-1)/2-r)*pitch});}
+      items.push({name:nm,parts:[{name:nm,m:k===2?mq:m,ext:extBase+k+1}],settings,cx:st.bedW/2+(c-(inRow-1)/2)*pitch,cy:st.bedD/2+((rows-1)/2-r)*pitch});}
     return items;};
   return [{name:'White coins',items:grid(9,'White coin',0)},{name:'Black coins',items:grid(9,'Black coin',1)},{name:'Queen',items:grid(1,'Queen',2)}];}
 function coinSVG(fill,design,R,dark){const gr=cc.depth>0?coinGrooves(design,R-0.6):[];
@@ -1416,10 +1436,10 @@ function coinSVG(fill,design,R,dark){const gr=cc.depth>0?coinGrooves(design,R-0.
     (gr.length?'<path fill-rule="evenodd" fill="'+(dark?'rgba(255,255,255,.26)':'rgba(0,0,0,.26)')+'" d="'+gr.map(polyD).join('')+'"/>':'');}
 function drawCoins(){if(!window.polygonClipping||!$('#coinView'))return;const R=st.coin/2,gap=4,W=3*2*R+2*gap;
   $('#coinView').setAttribute('viewBox',f2(-R-1)+' '+f2(-R-1)+' '+f2(W+2)+' '+f2(2*R+2));
-  $('#coinView').innerHTML=cc.colors.map((c,i)=>'<g transform="translate('+f2(i*(2*R+gap))+' 0)">'+coinSVG(c,cc.design,R,i===1)+'</g>').join('');
+  $('#coinView').innerHTML=cc.colors.map((c,i)=>'<g transform="translate('+f2(i*(2*R+gap))+' 0)">'+coinSVG(c,i===2?queenOf(cc.design):cc.design,R,i===1)+'</g>').join('');
   $('#coinCap').textContent=COINS[cc.design].name+' · Ø'+f1(st.coin)+' mm × '+f1(cc.H)+' mm · white, black, queen';
   const box=$('#cdesigns');box.innerHTML='';
-  Object.keys(COINS).forEach(k=>{const b=document.createElement('button');b.type='button';b.className='dbtn';b.setAttribute('aria-pressed',String(cc.design===k));
+  Object.keys(COINS).filter(k=>st.jp||!COINS[k].jp).forEach(k=>{const b=document.createElement('button');b.type='button';b.className='dbtn';b.setAttribute('aria-pressed',String(cc.design===k));
     b.innerHTML='<svg viewBox="'+f2(-R-1)+' '+f2(-R-1)+' '+f2(2*R+2)+' '+f2(2*R+2)+'" aria-hidden="true">'+coinSVG(cc.colors[0],k,R,false)+'</svg><span>'+COINS[k].name+'</span>';
     b.addEventListener('click',()=>{cc.design=k;drawCoins();});box.appendChild(b);});
   $('#coinDia').textContent=f1(st.coin)+' mm';
@@ -1630,7 +1650,7 @@ $('#cgRails').addEventListener('click',goRails);
   const mark=()=>document.querySelectorAll('#scrHead button').forEach(b=>b.setAttribute('aria-pressed',String((b.dataset.cs==='1')===scr.cs)));
   document.querySelectorAll('#scrHead button').forEach(b=>b.addEventListener('click',()=>{scr.cs=b.dataset.cs==='1';mark();redraw();}));
   $('#scrLen').addEventListener('change',e=>{const v=parseFloat(e.target.value);if(!isNaN(v))scr.len=Math.min(60,Math.max(8,v));e.target.value=scr.len;redraw();});mark();})();
-(function(){const sel=$('#cgDeco');[['match','Match the striker'],['none','None (one colour)']].concat(Object.keys(STRIKERS).map(k=>[k,STRIKERS[k].name])).forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;sel.appendChild(o);});
+(function(){const sel=$('#cgDeco');[['match','Match the striker'],['none','None (one colour)']].concat(Object.keys(STRIKERS).filter(k=>!STRIKERS[k].jp).map(k=>[k,STRIKERS[k].name])).forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;sel.appendChild(o);});
   sel.value=CG.deco;sel.addEventListener('change',()=>{CG.deco=sel.value;drawGuard();});})();$('#railsEdit').addEventListener('click',goRails);
 $('#cg3mfBtn').addEventListener('click',async()=>{if(!window.JSZip){toast('The 3MF writer could not load.');return;}
   try{const pl=guardPlates();pl.colours=cornerDeco(cornerDims())?sk.colors.slice():['#F2B705'];const blob=await bambu3MF(pl,'blob');save('carrom-printed-corners-'+Math.round(railStock())+'mm.3mf',blob);}
@@ -1884,7 +1904,7 @@ function applyHL(){const sv=$('#board');if(!sv)return;const old=sv.querySelector
 /* which element on the page belongs to which help entry */
 function helpTargets(){const out=[];
   ['size','presets','bed','designs','kseg','palette'].forEach(k=>{const el=$('#'+k);const f=el&&el.closest('.field');if(f)out.push([k,f]);});
-  ['overlay','lean'].forEach(k=>{const el=$('#'+k);if(el)out.push([k,el.closest('label')||el]);});
+  ['overlay','lean','jp'].forEach(k=>{const el=$('#'+k);if(el)out.push([k,el.closest('label')||el]);});
   ['pocket','striker','coin','gap','lw','mandala','overhang','pilot','stT','sawClear','rim','rW','rH','rT','rB','scrHead','scrLen'].forEach(k=>{const el=$('#'+k),lb=document.querySelector('label[for="'+k+'"]');if(el)out.push([k,el.closest('.row')||el]);if(lb)out.push([k,lb]);});
   return out;}
 function showHelp(k,el){const tip=$('#tip'),h=HELP[k];if(!h)return;hlKey=k;applyHL();
@@ -1903,6 +1923,59 @@ helpTargets().forEach(([k,el])=>{el.dataset.help=k;
   el.addEventListener('focusin',()=>showHelp(k,el));el.addEventListener('focusout',e=>{if(!el.contains(e.relatedTarget))hideHelp();});});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')hideHelp();});
 window.addEventListener('scroll',()=>{if($('#tip').classList.contains('show')&&!document.activeElement.closest('[data-help]'))hideHelp();},{passive:true});
+
+/* ---------- storage box: coins on edge in 2 rows, 2 strikers flat, a lid that slides in 45 degree grooves ---------- */
+const BX={wall:3,floor:2,lidT:2.4,groove:1.6,lip:1.2,c:0.25,deco:'star',inlay:0.6};   // the lid always carries the small star
+function boxDims(){const cs=cc.H+0.4,per=Math.ceil(19/2),Lc=per*cs+2,Ls=sk.D+2,W=Math.max(2*(st.coin+1)+2,Ls),Hin=Math.max(st.coin+1.5,2*sk.H+1.5);
+  const L=Lc+2+Ls,zb=BX.floor+Hin,Ht=zb+BX.lidT+BX.lip;return {cs,per,Lc,Ls,W,Hin,L,zb,Ht,Wo:W+2*BX.wall,Lo:L+2*BX.wall};}
+/* a prism along x from a (y,z) cross-section */
+function prismX(mp,x0,x1){const m=Mesh();extrude(m,mp,x0,x1);m.v.forEach(v=>{const [a,b,c]=v;v[0]=c;v[1]=a;v[2]=b;});return fixOut(m);}
+function boxParts(){const D=boxDims(),{W,L,zb,Ht,Wo,Ls}=D,PC=window.polygonClipping,{wall,floor,lidT:T,groove:d,c}=BX,h1=T-d;
+  const gR=[[[W/2-0.05,zb-c],[W/2+d,zb-c],[W/2+d,zb+h1],[W/2,zb+T]]],gL=[gR[0].map(([y,z])=>[-y,z])];
+  const sec=PC.difference(rect(-Wo/2,0,Wo/2,Ht),rect(-W/2,floor,W/2,Ht+1),gR,gL);
+  const x0=-L/2-wall,x1=L/2+wall,parts=[];
+  parts.push({name:'shell',m:prismX(sec,x0,x1)});
+  parts.push({name:'back wall',m:prismX([rect(-Wo/2,0,Wo/2,Ht)],x0,-L/2)});
+  parts.push({name:'front wall',m:prismX([rect(-Wo/2,0,Wo/2,zb-c)],L/2,x1)});
+  const xd=-L/2+Ls;parts.push({name:'divider',m:prismX([rect(-W/2,floor-0.01,W/2,zb-1)],xd,xd+2)});
+  const rib=Mesh();extrude(rib,[rect(xd+2,-1,L/2,1)],floor-0.01,floor+12);parts.push({name:'rib',m:fixOut(rib)});
+  return parts;}
+/* lid: bottom flat on the bed, 45 degree edges in the grooves, a thumb dip at the front, an optional inlaid motif */
+function lidParts(){const D=boxDims(),{W,L}=D,PC=window.polygonClipping,{lidT:T,groove:d,c,inlay:I}=BX,h1=T-d,a=W/2+d-c,b=W/2-c;
+  const xa=-L/2+0.3,xb=L/2+BX.wall,top=T-1;
+  const sec=PC.intersection([[[-a,0],[a,0],[a,h1],[b,T],[-b,T],[-a,h1]]],rect(-a-1,0,a+1,top));
+  const parts=[{name:'lid',m:prismX(sec,xa,xb),ext:1}];
+  const dip=[circ(xb-9,0,1,4)].length&&[(()=>{const p=[];for(let i=0;i<40;i++){const t=i/40*TAU;p.push([xb-9+5*Math.cos(t),11*Math.sin(t)]);}return p;})()];
+  const slab=PC.difference(rect(xa,-b,xb,b),dip);
+  const k=BX.deco==='match'?sk.design:BX.deco,R=Math.min(W/2-7,26),cx=(xa+xb-18)/2;let A=[],B=[];
+  if(k!=='none'&&(MOTIFS[k]||STRIKERS[k])){const [ga,gb]=(MOTIFS[k]||STRIKERS[k].build)(R),mv=g=>g.map(po=>po.map(r=>r.map(([x,y])=>[x+cx,y])));A=PC.union(...mv(ga));B=PC.difference(PC.union(...mv(gb)),A);}
+  const lo=Mesh();extrude(lo,slab,top,T-I);parts.push({name:'lid top',m:fixOut(lo),ext:1});
+  const hi=Mesh();extrude(hi,A.length||B.length?PC.difference(slab,...(A.length?[A]:[]),...(B.length?[B]:[])):slab,T-I,T);parts.push({name:'lid face',m:fixOut(hi),ext:1});
+  [[A,2,'motif colour 2'],[B,3,'motif colour 3']].forEach(([g,e,nm])=>{if(g.length){const m=Mesh();extrude(m,g,T-I,T);parts.push({name:nm,m:fixOut(m),ext:e});}});
+  return parts;}
+function boxPlates(){const body=boxParts(),lid=lidParts(),sb=centreXY(body),sl=centreXY(lid),gap=8,settings={wall_loops:'3',sparse_infill_density:'15%'};
+  const two=sb.H+sl.H+gap<=st.bedD-6;
+  const it=(nm,parts,cy)=>({name:nm,parts:parts.map(x=>({name:nm+' '+x.name,m:x.m,ext:x.ext||1})),settings,cx:st.bedW/2,cy});
+  if(two)return [{name:'Box',items:[it('Box',body,st.bedD/2+(sl.H+gap)/2),it('Box lid',lid,st.bedD/2-(sb.H+gap)/2)]}];
+  return [{name:'Box',items:[it('Box',body,st.bedD/2)]},{name:'Box lid',items:[it('Box lid',lid,st.bedD/2)]}];}
+function boxDecoOn(){const k=BX.deco==='match'?sk.design:BX.deco;return k!=='none';}
+function drawBox(){if(!$('#bxView'))return;const D=boxDims(),{W,L,Lc,Ls,cs,per,Wo,Lo,Ht,zb}=D,wl=BX.wall,cr=st.coin/2;
+  /* top view without the lid: 2 rows of coins on edge, 2 strikers in the back compartment */
+  let g='<rect x="'+f2(-Lo/2)+'" y="'+f2(-Wo/2)+'" width="'+f2(Lo)+'" height="'+f2(Wo)+'" rx="2" fill="var(--accent)" stroke="var(--ink)" stroke-width="0.6"/>'+
+    '<rect x="'+f2(-L/2)+'" y="'+f2(-W/2)+'" width="'+f2(L)+'" height="'+f2(W)+'" fill="var(--panel)" stroke="var(--ink)" stroke-width="0.4"/>'+
+    '<rect x="'+f2(-L/2+Ls)+'" y="'+f2(-W/2)+'" width="2" height="'+f2(W)+'" fill="var(--accent)"/>'+
+    '<rect x="'+f2(-L/2+Ls+2)+'" y="-1" width="'+f2(Lc)+'" height="2" fill="var(--accent)"/>';
+  for(let r=0;r<2;r++)for(let i=0;i<per;i++){if(r*per+i>=19)continue;const x=-L/2+Ls+3+i*cs,y=r?1.5:-1.5-st.coin;
+    g+='<rect x="'+f2(x)+'" y="'+f2(y)+'" width="'+f2(cc.H)+'" height="'+f2(st.coin)+'" rx="1" fill="'+(r*per+i===18?cc.colors[2]:cc.colors[(i%2)])+'" stroke="var(--ink)" stroke-width="0.3"/>';}
+  g+='<circle cx="'+f2(-L/2+Ls/2)+'" cy="0" r="'+f2(sk.D/2)+'" fill="'+sk.colors[0]+'" stroke="var(--ink)" stroke-width="0.4"/><circle cx="'+f2(-L/2+Ls/2)+'" cy="0" r="'+f2(sk.D/2-3)+'" fill="none" stroke="'+sk.colors[1]+'" stroke-width="1.5"/>'+
+    '<text x="'+f2(-L/2+Ls/2)+'" y="'+f2(W/2+wl+7)+'" font-size="5" text-anchor="middle" fill="var(--muted)">2 strikers</text><text x="'+f2(-L/2+Ls+Lc/2)+'" y="'+f2(W/2+wl+7)+'" font-size="5" text-anchor="middle" fill="var(--muted)">19 coins on edge</text>'+
+    '<text x="'+f2(Lo/2+3)+'" y="1.5" font-size="5" fill="var(--muted)">lid slides in here ▸</text>';
+  $('#bxView').setAttribute('viewBox',f2(-Lo/2-4)+' '+f2(-Wo/2-4)+' '+f2(Lo+52)+' '+f2(Wo+16));$('#bxView').innerHTML=g;
+  $('#bxNote').textContent='Outside '+f1(Lo)+' × '+f1(Wo)+' × '+f1(Ht)+' mm. Coin slots '+f1(cs)+' mm wide for '+f1(st.coin)+' × '+f1(cc.H)+' mm coins; striker room '+f1(Ls)+' mm for 2 strikers of '+f1(sk.D)+' × '+f1(sk.H)+' mm.'+(Lo>st.bedW-6&&Lo>st.bedD-6?' Too long for your bed.':'');}
+$('#bx3mfBtn').addEventListener('click',async()=>{if(!window.JSZip){toast('The 3MF writer could not load.');return;}
+  try{const pl=boxPlates();pl.colours=boxDecoOn()?sk.colors.slice():['#F2B705'];const blob=await bambu3MF(pl,'blob');save('carrom-box.3mf',blob);}
+  catch(e){toast('Could not build the box. '+(e&&e.message||''));}});
+
 
 /* ---------- step tabs ---------- */
 const TABS=['design','print','build','play'];
