@@ -40,6 +40,10 @@ It works offline too: save the page (`index.html`) and open it in any modern bro
 - The 3MF uses Bambu Lab P2S settings. For another printer, pick your printer in Bambu Studio after you open the file.
 - Zine: print on one A4 sheet, landscape, one side, at "Actual size" (100%).
 
+## Support
+
+The tool is free. If it helped you build a board, you can buy me a coffee: ☕ [ko-fi.com/heromazes](https://ko-fi.com/heromazes)
+
 ## Licence
 
 © 2026 Hugo Tremolo. The tool, its designs and the files it makes are licensed under

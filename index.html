@@ -164,6 +164,11 @@ td:last-child{font-family:var(--mono);font-variant-numeric:tabular-nums;font-siz
 .rcover{display:none}
 .rsub{font-family:var(--display);font-size:16px;margin:14px 0 6px}
 #zine{display:none}
+.foot{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding-top:16px;font-size:13px;color:var(--muted)}
+.foot p{margin:0}
+.foot a{color:var(--ink);text-underline-offset:3px}
+.foot .kofi{font-weight:600;border:1px solid var(--line);border-radius:4px;padding:8px 12px;text-decoration:none;min-height:40px;display:inline-flex;align-items:center}
+.foot .kofi:hover{border-color:var(--accent)}
 .zlink{font-size:13px;font-weight:600;color:var(--ink);text-underline-offset:3px}
 .zguide{border:1px solid var(--line);border-radius:6px;background:var(--bg);padding:0 14px;scroll-margin-top:72px}
 .zguide summary{cursor:pointer;font-weight:700;font-family:var(--display);font-size:16px;min-height:48px;display:flex;align-items:center}
@@ -188,7 +193,7 @@ td:last-child{font-family:var(--mono);font-variant-numeric:tabular-nums;font-siz
   :root:not([data-theme="light"]),:root[data-theme="dark"],:root{--bg:#fff;--panel:#fff;--ink:#141414;--muted:#4a4a4a;--line:#c9c9c2;--accent-soft:#fbeeb8;--wood:#ead9b8;--wood-edge:#d8c49c;--rail:#5f4127;--hole:#141414;--warn:#a4470f;--ok:#2b7149;color-scheme:light}
   html,body{background:#fff!important}
   body{font-size:10pt;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  header,.wrap,#toast,.rhead,.rnav,.zguide,.rsub{display:none!important}
+  header,.wrap,#toast,.rhead,.rnav,.zguide,.rsub,.foot{display:none!important}
   .page{display:block;padding:0;max-width:none}
   .rules{border:0;padding:0;display:block!important;background:none}
   .tabs{display:none!important}
@@ -671,6 +676,10 @@ td:last-child{font-family:var(--mono);font-variant-numeric:tabular-nums;font-siz
     </article>
   </div>
 </section>
+<footer class="foot">
+  <p>Free under <a href="https://creativecommons.org/licenses/by-nc/4.0/" rel="noopener" target="_blank">CC BY-NC 4.0</a> · <a href="https://github.com/hugotremolo/carrom-board-maker" rel="noopener" target="_blank">Code on GitHub</a></p>
+  <a class="kofi" href="https://ko-fi.com/heromazes" rel="noopener" target="_blank">☕ Support my free projects on Ko-fi</a>
+</footer>
 <div id="zine" aria-hidden="true"></div>
 </div>
 <div id="toast" role="status" aria-live="polite"></div>
