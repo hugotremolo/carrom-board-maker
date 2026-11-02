@@ -15,7 +15,7 @@ Pick a board size and a centre design. The tool gives you everything to paint an
 - **Any printer bed**: stencils too big for your bed are cut into parts automatically.
 - **3D prints**:
   - a striker with 8 bottom designs, multi-colour with an AMS
-  - 19 coins weighted to 5.2 g
+  - 19 coins weighted to 5.2 g, with 8 engraved top designs (Plain, Rings, Waves, Mandala, Star, Pearls, Sun, Compass)
   - pocket rims that hold a bag (old socks work great), with the feet joined on if you like
   - feet in 4 designs and 3 heights
   - **printed corners**: cut the rails square, no mitres, with a round corner and a small inlaid motif on top
@@ -34,6 +34,8 @@ Sizes go from 455 mm up to the official 740 mm competition board.
 ![Pocket rim with a joined Offset hex foot](images/rim-with-foot.png)
 
 ![Storage box with a sliding lid](images/box.png)
+
+![Coin top designs](images/coins.png)
 
 ## How to use it
 
