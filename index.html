@@ -974,7 +974,10 @@ function buildPieces(G){
   const box={x0,y0,x1,y1};
   if(st.lean){const paint=dark.slice(0,3).concat([red[0]]);
     const arms=[rect(L/2-st.rim,y0,x1,y1),rect(cx1-st.rim/2,y0,cx1+st.rim/2,cyB)];
-    P.push(piece({id:'bl',name:'Baseline lines + red dot',use:'Each side ×4. Left half: face up. Right half: flip it over, left to right. Tape over the red dot to paint the lines. Tape over the lines to paint the red dot.',file:tag+'-02-baseline-lines-and-red-dot.svg',color:0,plate:leanPlate(paint,arms,rect(x0,y0,x1,y1)),holes:dark.concat([red[0]]),bridges:brs,tight:true,outl:true}));}
+    P.push(piece({id:'bl',name:'Baseline lines + red dot',use:'Each side ×4. Left half: face up. Right half: flip it over, left to right. Tape over the red dot to paint the lines. Tape over the lines to paint the red dot.',file:tag+'-02-baseline-lines-and-red-dot.svg',color:0,plate:leanPlate(paint,arms,rect(x0,y0,x1,y1)),holes:dark.concat([red[0]]),bridges:brs,tight:true,outl:true}));
+    /* red dot only, for a circle already painted all black: a small disc with the dot hole; 4 sight slots sit just outside the black circle, away from the lines, and 2 notches point along the baselines */
+    const ro=g/2+lw/2,dotR=ro+6,sights=[1,3,5,7].map(i=>sector(cx1,cyB,ro,ro+1.5,i*Math.PI/4-0.26,i*Math.PI/4+0.26)),nch=[1,-1].map(sg=>[[[cx1-2,cyB+sg*(dotR+1)],[cx1+2,cyB+sg*(dotR+1)],[cx1,cyB+sg*(dotR-3)]]]);
+    P.push(piece({id:'dot',name:'Red dot only',use:'Optional, ×8. For a circle you already painted all black. Point the 2 notches along the baseline, move it until no black shows in the 4 small slots, tape it, paint the red dot.',file:tag+'-02b-baseline-red-dot-only.svg',color:1,plate:[circ(cx1,cyB,dotR,120)],holes:[[circ(cx1,cyB,12.7)]].concat(sights,nch),tight:true,outl:true}));}
   else{
   P.push(piece({id:'blL',name:'Baseline lines, left',use:'Left half of each side, ×4',file:tag+'-02-baseline-lines-left.svg',color:0,plate:rect(x0,y0,x1,y1),holes:dark,bridges:brs,x0,y0,W,H:Hh,box}));
   P.push(piece({id:'blR',name:'Baseline lines, right',use:'Right half of each side, ×4',file:tag+'-03-baseline-lines-right.svg',color:0,plate:rect(x0,y0,x1,y1),holes:dark,bridges:brs,x0,y0,W,H:Hh,mirror:true}));
