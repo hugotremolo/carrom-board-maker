@@ -535,14 +535,14 @@ td:last-child{font-family:var(--mono);font-variant-numeric:tabular-nums;font-siz
       <h2>Storage box (3D print)</h2>
       <div class="sgrid">
         <div>
-          <svg id="bxView" role="img" aria-label="Storage box from above without its lid: 19 coins on edge in 2 rows, and 2 strikers"></svg>
+          <svg id="bxView" role="img" aria-label="Storage box from above without its lid: 19 coins on edge in 2 rows, 2 strikers in a round well, and the powder shaker beside them"></svg>
         </div>
         <div class="field">
           <p class="weight" id="bxNote"></p>
           <div class="exports">
-            <button class="btn primary" id="bx3mfBtn" data-dl type="button">Download box + lid (.3mf)</button>
+            <button class="btn primary" id="bx3mfBtn" data-dl type="button">Download box + lid + shaker (.3mf)</button>
           </div>
-          <p class="note">Holds the 19 coins standing on edge in 2 rows, and 2 strikers lying flat. The lid slides in from the front along 45° grooves, so nothing needs supports, and stops at the back wall. Push it with your thumb in the dip. The sizes follow your coins and striker. The lid has a small inlaid star in your striker colours (AMS).</p>
+          <p class="note">Holds the 19 coins standing on edge in 2 rows, and 2 strikers lying flat in a round well, so they do not slide. To take the strikers out, push them up through the hole in the floor. The powder shaker stands in its own well beside them. Shaker: unscrew the cap, fill the bottle about half full with carrom powder, screw the cap back on, and push the cover on top. The cover grips by friction; push it on firmly. Print the cap and the cover as they come, top on the bed. If the cover is loose, put one turn of tape on the cap. The lid slides in from the front along 45° grooves, so nothing needs supports, and stops at the back wall. Push it with your thumb in the dip. The sizes follow your coins and striker. The lid has a small inlaid star in your striker colours (AMS).</p>
         </div>
       </div>
     </section>
@@ -1939,15 +1939,23 @@ window.addEventListener('scroll',()=>{if($('#tip').classList.contains('show')&&!
 
 /* ---------- storage box: coins on edge in 2 rows, 2 strikers flat, a lid that slides in 45 degree grooves ---------- */
 const BX={wall:3,floor:2,lidT:2.4,groove:1.6,lip:1.2,c:0.25,deco:'star',inlay:0.6};   // the lid always carries the small star
-function boxDims(){const cs=cc.H+0.4,per=Math.ceil(19/2),Lc=per*cs+2,Ls=sk.D+2,W=Math.max(2*(st.coin+1)+2,Ls),Hin=Math.max(st.coin+1.5,2*sk.H+1.5);
-  const L=Lc+2+Ls,zb=BX.floor+Hin,Ht=zb+BX.lidT+BX.lip;return {cs,per,Lc,Ls,W,Hin,L,zb,Ht,Wo:W+2*BX.wall,Lo:L+2*BX.wall};}
+function boxDims(){const cs=cc.H+0.4,per=Math.ceil(19/2),Lc=per*cs+2,Ls=sk.D+2,Rh=sk.D/2+0.6,Hin=Math.max(st.coin+1.5,2*sk.H+1.5);
+  const W=Math.max(2*(st.coin+1)+2,Ls,2*Rh+1.2+18.8),L=Lc+2+Ls,zb=BX.floor+Hin,Ht=zb+BX.lidT+BX.lip;
+  /* back compartment: the strikers sit in a round well against one side, the powder shaker stands in a well beside them */
+  const wA=W-2*Rh-1.2,Ds=Math.min(wA-0.8,28),Rsh=Ds/2+0.4,xs=-L/2+Ls/2,ys=-W/2+Rh,ysh=W/2-wA/2,hr=Math.min(Hin-2,2*sk.H-3);
+  return {cs,per,Lc,Ls,W,Hin,L,zb,Ht,Wo:W+2*BX.wall,Lo:L+2*BX.wall,Rh,Rsh,xs,ys,ysh,Ds,hr};}
 /* a prism along x from a (y,z) cross-section */
 function prismX(mp,x0,x1){const m=Mesh();extrude(m,mp,x0,x1);m.v.forEach(v=>{const [a,b,c]=v;v[0]=c;v[1]=a;v[2]=b;});return fixOut(m);}
-function boxParts(){const D=boxDims(),{W,L,zb,Ht,Wo,Ls}=D,PC=window.polygonClipping,{wall,floor,lidT:T,groove:d,c}=BX,h1=T-d;
+function boxParts(){const D=boxDims(),{W,L,zb,Ht,Wo,Ls,Rh,Rsh,xs,ys,ysh,hr}=D,PC=window.polygonClipping,{wall,floor,lidT:T,groove:d,c}=BX,h1=T-d;
   const gR=[[[W/2-0.05,zb-c],[W/2+d,zb-c],[W/2+d,zb+h1],[W/2,zb+T]]],gL=[gR[0].map(([y,z])=>[-y,z])];
-  const sec=PC.difference(rect(-Wo/2,0,Wo/2,Ht),rect(-W/2,floor,W/2,Ht+1),gR,gL);
+  const sec=PC.difference(rect(-Wo/2,0,Wo/2,Ht),rect(-W/2,-1,W/2,Ht+1),gR,gL);
   const x0=-L/2-wall,x1=L/2+wall,parts=[];
   parts.push({name:'shell',m:prismX(sec,x0,x1)});
+  /* floor with a push hole under the strikers: push them up from below */
+  const fl=Mesh();extrude(fl,PC.difference(rect(x0,-Wo/2,x1,Wo/2),[circ(xs,ys,10,48)]),0,floor);parts.push({name:'floor',m:fixOut(fl)});
+  /* round holder walls: one well for the 2 strikers, one for the powder shaker */
+  const hw=PC.intersection(rect(-L/2-0.5,-W/2-0.5,-L/2+Ls+0.5,W/2+0.5),PC.difference(PC.union([circ(xs,ys,Rh+1.6,120)],[circ(xs,ysh,Rsh+1.6,72)]),[circ(xs,ys,Rh,120)],[circ(xs,ysh,Rsh,72)]));
+  const hm=Mesh();extrude(hm,hw,floor-0.01,floor+hr);parts.push({name:'holders',m:fixOut(hm)});
   parts.push({name:'back wall',m:prismX([rect(-Wo/2,0,Wo/2,Ht)],x0,-L/2)});
   parts.push({name:'front wall',m:prismX([rect(-Wo/2,0,Wo/2,zb-c)],L/2,x1)});
   const xd=-L/2+Ls;parts.push({name:'divider',m:prismX([rect(-W/2,floor-0.01,W/2,zb-1)],xd,xd+2)});
@@ -1966,13 +1974,49 @@ function lidParts(){const D=boxDims(),{W,L}=D,PC=window.polygonClipping,{lidT:T,
   const hi=Mesh();extrude(hi,A.length||B.length?PC.difference(slab,...(A.length?[A]:[]),...(B.length?[B]:[])):slab,T-I,T);parts.push({name:'lid face',m:fixOut(hi),ext:1});
   [[A,2,'motif colour 2'],[B,3,'motif colour 3']].forEach(([g,e,nm])=>{if(g.length){const m=Mesh();extrude(m,g,T-I,T);parts.push({name:nm,m:fixOut(m),ext:e});}});
   return parts;}
+/* ---------- powder shaker: a bottle with a screw sifter cap and a pop-on cover, sized to stand in the box ---------- */
+/* a tube whose outer and inner radius follow r(theta,z): threads, flutes and tapers */
+function tubeRZ(n,zs,rOut,rIn){const m=Mesh(),A=i=>i/n*TAU,P=(r,a,z)=>m.id(r*Math.cos(a),r*Math.sin(a),z);
+  for(let k=0;k<zs.length-1;k++){const z0=zs[k],z1=zs[k+1];for(let i=0;i<n;i++){const a=A(i),b=A((i+1)%n);
+    const o0=P(rOut(a,z0),a,z0),o1=P(rOut(b,z0),b,z0),o2=P(rOut(b,z1),b,z1),o3=P(rOut(a,z1),a,z1);m.tri(o0,o1,o2);m.tri(o0,o2,o3);
+    const i0=P(rIn(a,z0),a,z0),i1=P(rIn(b,z0),b,z0),i2=P(rIn(b,z1),b,z1),i3=P(rIn(a,z1),a,z1);m.tri(i0,i2,i1);m.tri(i0,i3,i2);}}
+  [[zs[0],false],[zs[zs.length-1],true]].forEach(([z,up])=>{for(let i=0;i<n;i++){const a=A(i),b=A((i+1)%n),o0=P(rOut(a,z),a,z),o1=P(rOut(b,z),b,z),i0=P(rIn(a,z),a,z),i1=P(rIn(b,z),b,z);
+    if(up){m.tri(o0,o1,i1);m.tri(o0,i1,i0);}else{m.tri(o0,i1,o1);m.tri(o0,i0,i1);}}});
+  return fixOut(m);}
+const zSteps=(a,b,h)=>{const k=Math.max(1,Math.ceil((b-a)/h)),o=[];for(let i=0;i<=k;i++)o.push(a+(b-a)*i/k);return o;};
+/* thread: pitch 3 mm, 0.9 mm deep, flat crest and root, 45 degree flanks (prints without supports) */
+const SHK={pitch:3,dep:0.9,cl:0.35,neck:7,hc:9.4,top:1.2,n:120};
+const thr=(a,z)=>{let u=(z-SHK.pitch*a/TAU)/SHK.pitch;u-=Math.floor(u);return Math.max(0,Math.min(1,1.6*(1-Math.abs(2*u-1))-0.3));};
+function shakerDims(){const D=boxDims(),Ds=D.Ds,Ro=Ds/2,Rc=Ro-1.35,rf=Rc-1.5,rm=rf-SHK.cl-SHK.dep,ri=rm-1.4,Hs=D.Hin-1,hb=Hs-SHK.hc-SHK.top;
+  const sz=hb-1.2-(Ro-1.4-ri),ml=Math.PI*Math.pow(Ro-1.6,2)*(sz-1.2)/1000+Math.PI*ri*ri*(SHK.neck+1.2)/1000;
+  return {Ds,Ro,Rc,rf,rm,ri,Hs,hb,ml};}
+function shakerParts(){const {Ro,Rc,rf,rm,ri,hb}=shakerDims(),{dep,neck,hc,top,n}=SHK,PC=window.polygonClipping,cl=(x,a,b)=>Math.max(a,Math.min(b,x));
+  /* bottle: body, a 45 degree shoulder (no bridge) and the threaded neck */
+  const body=[];const fl=Mesh();extrude(fl,[[circ(0,0,Ro,n)]],0,1.2);body.push({name:'base',m:fixOut(fl)});
+  body.push({name:'wall',m:tubeRZ(n,[0,hb],()=>Ro,()=>Ro-1.6)});
+  const sz=hb-1.2-(Ro-1.4-ri);body.push({name:'shoulder',m:lathe(Mesh(),[[ri,hb-1.2],[Ro-1.4,sz],[Ro-0.3,sz],[Ro-0.3,hb],[ri,hb]],n)});
+  body.push({name:'neck',m:tubeRZ(n,[hb-0.6].concat(zSteps(hb,hb+neck,0.15)),(a,z)=>{const zz=z-hb,f=cl(Math.min(zz-0.6,neck-zz)/1.5,0,1);return rm+dep*thr(a,z)*f;},()=>ri)});
+  /* sifter cap: female thread, flutes for grip, a taper cone on top for the cover, 7 holes */
+  const cone=z=>Rc-0.5*Math.max(0,z-4)/(hc-4),cap=[];
+  cap.push({name:'cap',m:tubeRZ(n,zSteps(0,hc,0.15),(a,z)=>cone(z)-0.4*(0.5-0.5*Math.cos(16*a))*(1-cl((z-4)/0.3,0,1)),(a,z)=>{const f=cl(Math.min(z-0.3,neck+0.4-z)/1,0,1);return rf-dep*(1-thr(a,z+hb))*f;})});
+  const holes=[[circ(0,0,0.7,16)]];for(let i=0;i<6;i++)holes.push([circ(3.2*Math.cos(i*TAU/6),3.2*Math.sin(i*TAU/6),0.7,16)]);
+  const tp=Mesh();extrude(tp,PC.difference([circ(0,0,rf+0.3,n)],...holes),neck+0.4,hc);cap.push({name:'sifter',m:fixOut(tp)});
+  /* pop-on cover: flush with the body, grips on the cone (friction fit) */
+  const cov=[];cov.push({name:'cover',m:tubeRZ(n,[0,4,4.3].concat(zSteps(4.6,hc,0.3)),()=>Ro,(a,z)=>z<=4.3?Rc+0.2:cone(z)-0.03+0.23*(1-cl((z-4.3)/0.3,0,1)))});
+  const ct=Mesh();extrude(ct,[[circ(0,0,Ro,n)]],hc-0.01,hc+top);cov.push({name:'cover top',m:fixOut(ct)});
+  /* cap and cover print upside down: their flat tops on the bed */
+  const flip=(parts,H)=>{parts.forEach(q=>q.m.v.forEach(v=>{v[1]=-v[1];v[2]=H-v[2];}));return parts;};
+  return {body,cap:flip(cap,hc),cover:flip(cov,hc+top)};}
 function boxPlates(){const body=boxParts(),lid=lidParts(),sb=centreXY(body),sl=centreXY(lid),gap=8,settings={wall_loops:'3',sparse_infill_density:'15%'};
   const two=sb.H+sl.H+gap<=st.bedD-6;
   const it=(nm,parts,cy)=>({name:nm,parts:parts.map(x=>({name:nm+' '+x.name,m:x.m,ext:x.ext||1})),settings,cx:st.bedW/2,cy});
-  if(two)return [{name:'Box',items:[it('Box',body,st.bedD/2+(sl.H+gap)/2),it('Box lid',lid,st.bedD/2-(sb.H+gap)/2)]}];
-  return [{name:'Box',items:[it('Box',body,st.bedD/2)]},{name:'Box lid',items:[it('Box lid',lid,st.bedD/2)]}];}
+  const sp=shakerParts(),Ds=shakerDims().Ds,sh=[['Shaker bottle',sp.body],['Shaker cap',sp.cap],['Shaker cover',sp.cover]];sh.forEach(([,q])=>centreXY(q));
+  const sit=(cx,cy0,dx,dy)=>sh.map(([nm,q],i)=>Object.assign(it(nm,q,cy0+(i-1)*dy),{cx:cx+(i-1)*dx}));
+  const xr=st.bedW/2+Math.max(sb.W,sl.W)/2+gap+Ds/2,side=xr+Ds/2<=st.bedW-4&&3*(Ds+6)<=st.bedD-6;
+  if(two)return [{name:'Box',items:[it('Box',body,st.bedD/2+(sl.H+gap)/2),it('Box lid',lid,st.bedD/2-(sb.H+gap)/2)].concat(side?sit(xr,st.bedD/2,0,Ds+6):[])}].concat(side?[]:[{name:'Powder shaker',items:sit(st.bedW/2,st.bedD/2,Ds+8,0)}]);
+  return [{name:'Box',items:[it('Box',body,st.bedD/2)].concat(side?sit(xr,st.bedD/2,0,Ds+6):[])},{name:'Box lid',items:[it('Box lid',lid,st.bedD/2)]}].concat(side?[]:[{name:'Powder shaker',items:sit(st.bedW/2,st.bedD/2,Ds+8,0)}]);}
 function boxDecoOn(){const k=BX.deco==='match'?sk.design:BX.deco;return k!=='none';}
-function drawBox(){if(!$('#bxView'))return;const D=boxDims(),{W,L,Lc,Ls,cs,per,Wo,Lo,Ht,zb}=D,wl=BX.wall,cr=st.coin/2;
+function drawBox(){if(!$('#bxView'))return;const D=boxDims(),{W,L,Lc,Ls,cs,per,Wo,Lo,Ht,zb,Rh,Rsh,xs,ys,ysh,Ds}=D,wl=BX.wall,cr=st.coin/2,SD=shakerDims();
   /* top view without the lid: 2 rows of coins on edge, 2 strikers in the back compartment */
   let g='<rect x="'+f2(-Lo/2)+'" y="'+f2(-Wo/2)+'" width="'+f2(Lo)+'" height="'+f2(Wo)+'" rx="2" fill="var(--accent)" stroke="var(--ink)" stroke-width="0.6"/>'+
     '<rect x="'+f2(-L/2)+'" y="'+f2(-W/2)+'" width="'+f2(L)+'" height="'+f2(W)+'" fill="var(--panel)" stroke="var(--ink)" stroke-width="0.4"/>'+
@@ -1980,11 +2024,14 @@ function drawBox(){if(!$('#bxView'))return;const D=boxDims(),{W,L,Lc,Ls,cs,per,W
     '<rect x="'+f2(-L/2+Ls+2)+'" y="-1" width="'+f2(Lc)+'" height="2" fill="var(--accent)"/>';
   for(let r=0;r<2;r++)for(let i=0;i<per;i++){if(r*per+i>=19)continue;const x=-L/2+Ls+3+i*cs,y=r?1.5:-1.5-st.coin;
     g+='<rect x="'+f2(x)+'" y="'+f2(y)+'" width="'+f2(cc.H)+'" height="'+f2(st.coin)+'" rx="1" fill="'+(r*per+i===18?cc.colors[2]:cc.colors[(i%2)])+'" stroke="var(--ink)" stroke-width="0.3"/>';}
-  g+='<circle cx="'+f2(-L/2+Ls/2)+'" cy="0" r="'+f2(sk.D/2)+'" fill="'+sk.colors[0]+'" stroke="var(--ink)" stroke-width="0.4"/><circle cx="'+f2(-L/2+Ls/2)+'" cy="0" r="'+f2(sk.D/2-3)+'" fill="none" stroke="'+sk.colors[1]+'" stroke-width="1.5"/>'+
-    '<text x="'+f2(-L/2+Ls/2)+'" y="'+f2(W/2+wl+7)+'" font-size="5" text-anchor="middle" fill="var(--muted)">2 strikers</text><text x="'+f2(-L/2+Ls+Lc/2)+'" y="'+f2(W/2+wl+7)+'" font-size="5" text-anchor="middle" fill="var(--muted)">19 coins on edge</text>'+
+  g+='<g fill="none" stroke="var(--accent)" stroke-width="1.6"><circle cx="'+f2(xs)+'" cy="'+f2(ys)+'" r="'+f2(Rh+0.8)+'"/><circle cx="'+f2(xs)+'" cy="'+f2(ysh)+'" r="'+f2(Rsh+0.8)+'"/></g>'+
+    '<circle cx="'+f2(xs)+'" cy="'+f2(ys)+'" r="'+f2(sk.D/2)+'" fill="'+sk.colors[0]+'" stroke="var(--ink)" stroke-width="0.4"/><circle cx="'+f2(xs)+'" cy="'+f2(ys)+'" r="'+f2(sk.D/2-3)+'" fill="none" stroke="'+sk.colors[1]+'" stroke-width="1.5"/>'+
+    '<circle cx="'+f2(xs)+'" cy="'+f2(ys)+'" r="10" fill="none" stroke="var(--ink)" stroke-width="0.4" stroke-dasharray="1.5 1.2"/>'+
+    '<circle cx="'+f2(xs)+'" cy="'+f2(ysh)+'" r="'+f2(Ds/2)+'" fill="#d8d2c4" stroke="var(--ink)" stroke-width="0.4"/>'+[[0,0]].concat(Array.from({length:6},(_,i)=>[3.2*Math.cos(i*TAU/6),3.2*Math.sin(i*TAU/6)])).map(([x,y])=>'<circle cx="'+f2(xs+x)+'" cy="'+f2(ysh+y)+'" r="0.7" fill="var(--ink)"/>').join('')+
+    '<text x="'+f2(xs)+'" y="'+f2(W/2+wl+7)+'" font-size="5" text-anchor="middle" fill="var(--muted)">2 strikers + shaker</text><text x="'+f2(-L/2+Ls+Lc/2)+'" y="'+f2(W/2+wl+7)+'" font-size="5" text-anchor="middle" fill="var(--muted)">19 coins on edge</text>'+
     '<text x="'+f2(Lo/2+3)+'" y="1.5" font-size="5" fill="var(--muted)">lid slides in here ▸</text>';
   $('#bxView').setAttribute('viewBox',f2(-Lo/2-4)+' '+f2(-Wo/2-4)+' '+f2(Lo+52)+' '+f2(Wo+16));$('#bxView').innerHTML=g;
-  $('#bxNote').textContent='Outside '+f1(Lo)+' × '+f1(Wo)+' × '+f1(Ht)+' mm. Coin slots '+f1(cs)+' mm wide for '+f1(st.coin)+' × '+f1(cc.H)+' mm coins; striker room '+f1(Ls)+' mm for 2 strikers of '+f1(sk.D)+' × '+f1(sk.H)+' mm.'+(Lo>st.bedW-6&&Lo>st.bedD-6?' Too long for your bed.':'');}
+  $('#bxNote').textContent='Outside '+f1(Lo)+' × '+f1(Wo)+' × '+f1(Ht)+' mm. Coin slots '+f1(cs)+' mm wide for '+f1(st.coin)+' × '+f1(cc.H)+' mm coins; striker well '+f1(2*Rh)+' mm for 2 strikers of '+f1(sk.D)+' × '+f1(sk.H)+' mm. Powder shaker '+f1(Ds)+' × '+f1(SD.Hs)+' mm, about '+f1(SD.ml)+' ml.'+(Lo>st.bedW-6&&Lo>st.bedD-6?' Too long for your bed.':'');}
 $('#bx3mfBtn').addEventListener('click',async()=>{if(!window.JSZip){toast('The 3MF writer could not load.');return;}
   try{const pl=boxPlates();pl.colours=boxDecoOn()?sk.colors.slice():['#F2B705'];const blob=await bambu3MF(pl,'blob');save('carrom-box.3mf',blob);}
   catch(e){toast('Could not build the box. '+(e&&e.message||''));}});

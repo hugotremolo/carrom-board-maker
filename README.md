@@ -20,7 +20,7 @@ Pick a board size and a centre design. The tool gives you everything to paint an
   - feet in 4 designs and 3 heights
   - **printed corners**: cut the rails square, no mitres, with a round corner and a small inlaid motif on top
   - a rulebook holder that screws under the board
-  - a storage box with a sliding lid: 19 coins on edge and 2 strikers
+  - a storage box with a sliding lid: 19 coins on edge, 2 strikers in a round well, and a screw-top powder shaker
 - **Screws**: pick countersunk or flat heads and the length. A safety check makes sure no screw comes through the playing surface.
 - **Bambu Studio project**: one 3MF file with every part on its own plates, ready to slice.
 - **Build help**: layout dimensions, rail sizes and cut list, rail aiming marks, a finishing guide for the clear coat, and pocket bags.
@@ -34,6 +34,7 @@ Sizes go from 455 mm up to the official 740 mm competition board.
 ![Pocket rim with a joined Offset hex foot](images/rim-with-foot.png)
 
 ![Storage box with a sliding lid](images/box.png)
+![Box with the striker well and the powder shaker](images/box-shaker.png)
 
 ![Coin top designs](images/coins.png)
 
