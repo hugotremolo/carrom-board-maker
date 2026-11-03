@@ -819,7 +819,7 @@ const PALETTES={
 };
 const TIERS={2:[1,0,1,0,0],3:[1,2,0,2,0],4:[1,2,3,2,0],5:[1,2,3,4,0]};
 const CNAMES=['Lines','Red accent','Colour 3','Colour 4','Colour 5'];
-const st={L:600,design:'lotus',k:3,pal:'bright',colors:PALETTES.bright.c.slice(),pocket:45,lw:2,gap:31.8,coin:31,striker:41,m:0,pilot:6.5,sawClear:1,stT:0.8,lean:true,jp:false,rim:25,bedW:256,bedD:256,mandalaD:0,overlay:true};
+const st={L:600,design:'lotus',k:3,pal:'bright',colors:PALETTES.bright.c.slice(),pocket:45,lw:2,gap:31.8,coin:31,striker:41,m:0,pilot:6.5,sawClear:1,stT:0.8,lean:true,rim:25,bedW:256,bedD:256,mandalaD:0,overlay:true};
 const $=s=>document.querySelector(s);
 const f1=n=>(Math.round(n*10)/10).toFixed(1);
 const f2=n=>(Math.round(n*100)/100).toString();
@@ -1027,7 +1027,7 @@ function drawBoard(){const {s,pad}=boardMarkup(false);const sv=$('#board');const
 function boardSVG(){const L=G.L,m=st.m,W=L+2*m;const {s}=boardMarkup(true);
   return '<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="'+f2(W)+'mm" height="'+f2(W)+'mm" viewBox="'+f2(-m)+' '+f2(-m)+' '+f2(W)+' '+f2(W)+'">'+s+'</svg>\n';}
 function drawDesigns(){const box=$('#designs');box.innerHTML='';
-  Object.keys(DESIGNS).filter(k=>st.jp||!DESIGNS[k].jp).forEach(k=>{const b=document.createElement('button');b.type='button';b.className='dbtn';b.setAttribute('aria-pressed',String(st.design===k));
+  Object.keys(DESIGNS).forEach(k=>{const b=document.createElement('button');b.type='button';b.className='dbtn';b.setAttribute('aria-pressed',String(st.design===k));
     const map=TIERS[st.k];const sh=DESIGNS[k].build(45,45,42,8.6);let s='<svg viewBox="0 0 90 90" aria-hidden="true"><circle cx="45" cy="45" r="45" fill="var(--wood)"/>';
     sh.forEach(x=>{s+='<path fill-rule="evenodd" fill="'+st.colors[map[x.t]]+'" d="'+polyD(x.p)+'"/>';});
     b.innerHTML=s+'</svg><span>'+DESIGNS[k].name+'</span>';b.addEventListener('click',()=>{st.design=k;update();});box.appendChild(b);});}
@@ -1150,6 +1150,12 @@ const STRIKERS={
     return [a,b];}}
 };
 const sk={design:'bloom',D:41,H:9,inlay:1,colors:['#1f3a5f','#f2b705','#efe9dc']};
+/* a petal with a notch at its tip, like a cherry blossom petal */
+function notchPetal(cx,cy,th,rIn,rOut,hw,dep,nw){const P=polar(cx,cy,th);return window.polygonClipping.difference(petal(cx,cy,th,rIn,rOut,hw),[[P(rOut+3,-nw),P(rOut+3,nw),P(rOut-dep,0)]]);}
+Object.assign(STRIKERS,{
+  sakuraS:{name:'Sakura',build(R){const a=[],b=[[circ(0,0,0.1*R)]];
+    for(let i=0;i<5;i++)notchPetal(0,0,i*TAU/5-Math.PI/2,0.14*R,0.92*R,0.23*R,0.15*R,0.1*R).forEach(p=>a.push(p));
+    for(let i=0;i<5;i++)b.push(dot(0,0,(i+0.5)*TAU/5-Math.PI/2,0.52*R,0.07*R));return [a,b];}}});
 function strikerLayers(){const PC=window.polygonClipping,R=sk.D/2-1.5;const [a,b]=STRIKERS[sk.design].build(R);
   const A=PC.union(...a),B=PC.difference(PC.union(...b),A);return [A,B];}
 
@@ -1288,7 +1294,7 @@ function drawStriker(){if(!window.polygonClipping)return;
   $('#strikerView').innerHTML=strikerSVG(sk.design,true);
   $('#strikerCap').textContent=STRIKERS[sk.design].name+', Ø'+f1(sk.D)+' mm, bottom face';
   const box=$('#sdesigns');box.innerHTML='';
-  Object.keys(STRIKERS).filter(k=>st.jp||!STRIKERS[k].jp).forEach(k=>{const b=document.createElement('button');b.type='button';b.className='dbtn';b.setAttribute('aria-pressed',String(sk.design===k));
+  Object.keys(STRIKERS).forEach(k=>{const b=document.createElement('button');b.type='button';b.className='dbtn';b.setAttribute('aria-pressed',String(sk.design===k));
     const r=sk.D/2;b.innerHTML='<svg viewBox="'+f2(-r)+' '+f2(-r)+' '+f2(2*r)+' '+f2(2*r)+'" aria-hidden="true">'+strikerSVG(k,false)+'</svg><span>'+STRIKERS[k].name+'</span>';
     b.addEventListener('click',()=>{sk.design=k;drawStriker();drawGuard();drawBox();});box.appendChild(b);});
   const v=strikerBody(null).volume()/1000;
@@ -1397,8 +1403,6 @@ $('#projBtn').addEventListener('click',async()=>{if(!window.JSZip||!PIECES.lengt
 const cc={design:'rings',H:8.3,depth:1,target:5.2,colors:['#efe6d2','#232325','#c8102e']};
 const CCNAMES=['White coins','Black coins','Queen'];
 const COINS={plain:{name:'Plain'},rings:{name:'Rings'},waves:{name:'Waves'},mandala:{name:'Mandala'},star:{name:'Star'},pearls:{name:'Pearls'},sun:{name:'Sun'},compass:{name:'Compass'}};
-/* the queen gets her own version of some designs (the sun, a third horn) */
-const queenOf=d=>COINS[d]&&COINS[d].queen?d+'Q':d;
 function coinGrooves(design,R){const g=0.5,out=[];const ring=r=>out.push(annulus(0,0,r-g,r+g));
   const wave=(r,a,k)=>{const n=240,o=[],i=[];for(let j=0;j<n;j++){const t=j/n*TAU,rr=r+a*Math.sin(k*t);o.push([(rr+g)*Math.cos(t),(rr+g)*Math.sin(t)]);i.push([(rr-g)*Math.cos(t),(rr-g)*Math.sin(t)]);}out.push([o,i.reverse()]);};
   if(design==='rings'){ring(0.30*R);ring(0.60*R);ring(0.86*R);}
@@ -1432,12 +1436,12 @@ function coinInfill(m){const R=st.coin/2,V=m.volume(),core=Math.PI*Math.pow(Math
   const need=cc.target/1.24*1000,f=core>0?(need-shell)/core:1;
   return {full:V/1000*1.24,shellG:shell/1000*1.24,pct:Math.max(10,Math.min(100,Math.round(f*20)*5)),low:f<0.1,high:f>1};}
 /* one plate per colour: no filament swaps, so no purge waste */
-function coinPlates(extBase){const m=coinMesh(),inf=coinInfill(m),pitch=st.coin+6,mq=queenOf(cc.design)!==cc.design?(()=>{const d=cc.design;cc.design=queenOf(d);const q=coinMesh();cc.design=d;return q;})():m;
+function coinPlates(extBase){const m=coinMesh(),inf=coinInfill(m),pitch=st.coin+6;
   const settings={sparse_infill_density:inf.pct+'%',wall_loops:'3',top_shell_layers:'7',bottom_shell_layers:'7'};
   const grid=(n,label,k)=>{const cols=Math.ceil(Math.sqrt(n)),rows=Math.ceil(n/cols),items=[];
     for(let q=0;q<n;q++){const r=Math.floor(q/cols),c=q%cols,inRow=Math.min(cols,n-r*cols);
       const nm=n>1?label+' '+(q+1):label;
-      items.push({name:nm,parts:[{name:nm,m:k===2?mq:m,ext:extBase+k+1}],settings,cx:st.bedW/2+(c-(inRow-1)/2)*pitch,cy:st.bedD/2+((rows-1)/2-r)*pitch});}
+      items.push({name:nm,parts:[{name:nm,m,ext:extBase+k+1}],settings,cx:st.bedW/2+(c-(inRow-1)/2)*pitch,cy:st.bedD/2+((rows-1)/2-r)*pitch});}
     return items;};
   return [{name:'White coins',items:grid(9,'White coin',0)},{name:'Black coins',items:grid(9,'Black coin',1)},{name:'Queen',items:grid(1,'Queen',2)}];}
 function coinSVG(fill,design,R,dark){const gr=cc.depth>0?coinGrooves(design,R-0.6):[];
@@ -1445,10 +1449,10 @@ function coinSVG(fill,design,R,dark){const gr=cc.depth>0?coinGrooves(design,R-0.
     (gr.length?'<path fill-rule="evenodd" fill="'+(dark?'rgba(255,255,255,.26)':'rgba(0,0,0,.26)')+'" d="'+gr.map(polyD).join('')+'"/>':'');}
 function drawCoins(){if(!window.polygonClipping||!$('#coinView'))return;const R=st.coin/2,gap=4,W=3*2*R+2*gap;
   $('#coinView').setAttribute('viewBox',f2(-R-1)+' '+f2(-R-1)+' '+f2(W+2)+' '+f2(2*R+2));
-  $('#coinView').innerHTML=cc.colors.map((c,i)=>'<g transform="translate('+f2(i*(2*R+gap))+' 0)">'+coinSVG(c,i===2?queenOf(cc.design):cc.design,R,i===1)+'</g>').join('');
+  $('#coinView').innerHTML=cc.colors.map((c,i)=>'<g transform="translate('+f2(i*(2*R+gap))+' 0)">'+coinSVG(c,cc.design,R,i===1)+'</g>').join('');
   $('#coinCap').textContent=COINS[cc.design].name+' · Ø'+f1(st.coin)+' mm × '+f1(cc.H)+' mm · white, black, queen';
   const box=$('#cdesigns');box.innerHTML='';
-  Object.keys(COINS).filter(k=>st.jp||!COINS[k].jp).forEach(k=>{const b=document.createElement('button');b.type='button';b.className='dbtn';b.setAttribute('aria-pressed',String(cc.design===k));
+  Object.keys(COINS).forEach(k=>{const b=document.createElement('button');b.type='button';b.className='dbtn';b.setAttribute('aria-pressed',String(cc.design===k));
     b.innerHTML='<svg viewBox="'+f2(-R-1)+' '+f2(-R-1)+' '+f2(2*R+2)+' '+f2(2*R+2)+'" aria-hidden="true">'+coinSVG(cc.colors[0],k,R,false)+'</svg><span>'+COINS[k].name+'</span>';
     b.addEventListener('click',()=>{cc.design=k;drawCoins();});box.appendChild(b);});
   $('#coinDia').textContent=f1(st.coin)+' mm';
@@ -1659,7 +1663,7 @@ $('#cgRails').addEventListener('click',goRails);
   const mark=()=>document.querySelectorAll('#scrHead button').forEach(b=>b.setAttribute('aria-pressed',String((b.dataset.cs==='1')===scr.cs)));
   document.querySelectorAll('#scrHead button').forEach(b=>b.addEventListener('click',()=>{scr.cs=b.dataset.cs==='1';mark();redraw();}));
   $('#scrLen').addEventListener('change',e=>{const v=parseFloat(e.target.value);if(!isNaN(v))scr.len=Math.min(60,Math.max(8,v));e.target.value=scr.len;redraw();});mark();})();
-(function(){const sel=$('#cgDeco');[['match','Match the striker'],['none','None (one colour)']].concat(Object.keys(STRIKERS).filter(k=>!STRIKERS[k].jp).map(k=>[k,STRIKERS[k].name])).forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;sel.appendChild(o);});
+(function(){const sel=$('#cgDeco');[['match','Match the striker'],['none','None (one colour)']].concat(Object.keys(STRIKERS).map(k=>[k,STRIKERS[k].name])).forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;sel.appendChild(o);});
   sel.value=CG.deco;sel.addEventListener('change',()=>{CG.deco=sel.value;drawGuard();});})();$('#railsEdit').addEventListener('click',goRails);
 $('#cg3mfBtn').addEventListener('click',async()=>{if(!window.JSZip){toast('The 3MF writer could not load.');return;}
   try{const pl=guardPlates();pl.colours=cornerDeco(cornerDims())?sk.colors.slice():['#F2B705'];const blob=await bambu3MF(pl,'blob');save('carrom-printed-corners-'+Math.round(railStock())+'mm.3mf',blob);}
@@ -1913,7 +1917,7 @@ function applyHL(){const sv=$('#board');if(!sv)return;const old=sv.querySelector
 /* which element on the page belongs to which help entry */
 function helpTargets(){const out=[];
   ['size','presets','bed','designs','kseg','palette'].forEach(k=>{const el=$('#'+k);const f=el&&el.closest('.field');if(f)out.push([k,f]);});
-  ['overlay','lean','jp'].forEach(k=>{const el=$('#'+k);if(el)out.push([k,el.closest('label')||el]);});
+  ['overlay','lean'].forEach(k=>{const el=$('#'+k);if(el)out.push([k,el.closest('label')||el]);});
   ['pocket','striker','coin','gap','lw','mandala','overhang','pilot','stT','sawClear','rim','rW','rH','rT','rB','scrHead','scrLen'].forEach(k=>{const el=$('#'+k),lb=document.querySelector('label[for="'+k+'"]');if(el)out.push([k,el.closest('.row')||el]);if(lb)out.push([k,lb]);});
   return out;}
 function showHelp(k,el){const tip=$('#tip'),h=HELP[k];if(!h)return;hlKey=k;applyHL();
